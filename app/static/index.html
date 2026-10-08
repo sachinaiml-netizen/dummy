@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ProjectIQ — AI Knowledge Assistant</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div>
+        <span class="eyebrow">PROJECTIQ</span>
+        <h1>Ask your project knowledge base.</h1>
+        <p>Upload project PDFs and get answers grounded in the documents your team already uses.</p>
+      </div>
+      <div class="status"><span></span> Demo online</div>
+    </section>
+    <section class="grid">
+      <aside class="panel docs">
+        <div class="panel-head"><h2>Knowledge base</h2><p>Project documents available to the assistant.</p></div>
+        <label class="upload">
+          <input id="fileInput" type="file" accept="application/pdf">
+          <strong>Upload PDF</strong>
+          <span id="uploadText">Choose a project document to index it.</span>
+        </label>
+        <div class="doc-list">
+          <div class="doc"><b>Project Handbook</b><span>Project operations</span></div>
+          <div class="doc"><b>Vendor Policy</b><span>Vendor management</span></div>
+          <div class="doc"><b>Quality Checklist</b><span>Inspections</span></div>
+        </div>
+      </aside>
+      <section class="panel chat">
+        <div class="panel-head"><h2>AI assistant</h2><p>Document-grounded responses with source references.</p></div>
+        <div id="messages" class="messages">
+          <div class="message assistant">
+            <div class="avatar">AI</div>
+            <div class="bubble">
+              <p>Ask about vendor delays, project reviews, quality checks, or an uploaded document.</p>
+              <small>Sources: Project Handbook · Vendor Policy</small>
+            </div>
+          </div>
+        </div>
+        <div class="suggestions">
+          <button data-question="What should happen when a critical vendor is delayed?">Vendor delay</button>
+          <button data-question="What should be recorded in a weekly project review?">Weekly review</button>
+          <button data-question="When should a quality review be triggered?">Quality review</button>
+        </div>
+        <form id="chatForm" class="composer">
+          <input id="question" autocomplete="off" placeholder="Ask a question about your project documents..." required>
+          <button type="submit">Ask</button>
+        </form>
+      </section>
+    </section>
+    <footer><span>Client-demo prototype</span><span>FastAPI · PDF ingestion · grounded retrieval</span></footer>
+  </main>
+  <script src="/static/app.js"></script>
+</body>
+</html>
