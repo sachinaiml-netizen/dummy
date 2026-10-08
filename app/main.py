@@ -1,7 +1,9 @@
+from io import BytesIO
 from pathlib import Path
 
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from pypdf import PdfReader
 
@@ -13,10 +15,12 @@ BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
 
 app = FastAPI(
-    title="Real Estate Project Intelligence",
-    version="2.0.0",
+    title="ProjectIQ — AI Knowledge Assistant",
+    version="2.1.0",
     description="Project risk assessment plus a document-grounded AI assistant demo.",
 )
+
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 knowledge_base = list(DEFAULT_DOCS)
 
@@ -52,7 +56,7 @@ async def assistant_upload(file: UploadFile = File(...)):
         return {"status": "error", "message": "Please upload a PDF file."}
 
     contents = await file.read()
-    reader = PdfReader(contents)
+    reader = PdfReader(BytesIO(contents))
     pages = [(page.extract_text() or "") for page in reader.pages]
     text = "\n".join(pages).strip()
 
