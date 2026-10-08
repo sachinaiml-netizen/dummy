@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import os
 import re
 from dataclasses import dataclass
+
+from openai import OpenAI
 
 
 @dataclass
@@ -43,22 +46,25 @@ def _tokens(text: str) -> set[str]:
     return set(re.findall(r"[a-z0-9]{3,}", text.lower()))
 
 
-def answer_query(query: str, docs: list[KnowledgeDoc]) -> dict:
+def _rank_docs(query: str, docs: list[KnowledgeDoc]) -> list[tuple[int, KnowledgeDoc]]:
     query_tokens = _tokens(query)
     ranked: list[tuple[int, KnowledgeDoc]] = []
-
     for doc in docs:
         score = len(query_tokens & _tokens(doc.text))
         if score:
             ranked.append((score, doc))
-
     ranked.sort(key=lambda item: item[0], reverse=True)
+    return ranked
 
+
+def _fallback_answer(query: str, ranked: list[tuple[int, KnowledgeDoc]]) -> dict:
+    query_tokens = _tokens(query)
     if not ranked:
         return {
             "answer": "I could not find that information in the uploaded knowledge base.",
             "sources": [],
             "confidence": 0.0,
+            "mode": "retrieval",
         }
 
     top_score, top_doc = ranked[0]
@@ -74,4 +80,49 @@ def answer_query(query: str, docs: list[KnowledgeDoc]) -> dict:
         "answer": answer,
         "sources": [doc.name for _, doc in ranked[:3]],
         "confidence": round(confidence, 2),
+        "mode": "retrieval",
     }
+
+
+def answer_query(query: str, docs: list[KnowledgeDoc]) -> dict:
+    ranked = _rank_docs(query, docs)
+    if not ranked:
+        return _fallback_answer(query, ranked)
+
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        return _fallback_answer(query, ranked)
+
+    selected = [doc for _, doc in ranked[:4]]
+    context = "\n\n".join(
+        f"SOURCE: {doc.name}\n{doc.text[:5000]}" for doc in selected
+    )
+
+    try:
+        client = OpenAI(api_key=api_key)
+        response = client.responses.create(
+            model=os.getenv("OPENAI_MODEL", "gpt-6-luna"),
+            instructions=(
+                "You are a document-grounded business knowledge assistant. "
+                "Answer only from the supplied source text. Be concise and practical. "
+                "If the source text does not support the answer, say that clearly. "
+                "Do not invent policies, dates, people, metrics, or procedures."
+            ),
+            input=(
+                f"Question:\n{query}\n\n"
+                f"Source material:\n{context}\n\n"
+                "Return a direct answer in plain text."
+            ),
+        )
+        text = (response.output_text or "").strip()
+        if not text:
+            return _fallback_answer(query, ranked)
+
+        return {
+            "answer": text,
+            "sources": [doc.name for doc in selected],
+            "confidence": 0.9,
+            "mode": "openai",
+        }
+    except Exception:
+        return _fallback_answer(query, ranked)
