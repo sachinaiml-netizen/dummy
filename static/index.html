@@ -75,7 +75,7 @@
           <div class="insight"><div class="mini">What the model sees</div><p id="keyInsight">Loading scenario and downstream effects…</p></div>
           <div class="analysisgrid">
             <div>
-              <div class="sectionlabel">Controlling dependency chain · baseline</div>
+              <div class="sectionlabel">One representative critical path · baseline</div>
               <div id="baselineChain" class="chain"></div>
               <div class="legend"><span><i class="key"></i> Controlling path</span><span><i class="key orange"></i> Schedule moved</span></div>
             </div>
@@ -109,7 +109,7 @@
   <section class="panel">
     <div class="panelhead"><h3>Activity-level impact trace</h3><span class="index">04 / TRACEABILITY</span></div>
     <div class="schedule-wrap">
-      <table class="schedule"><thead><tr><th>Activity / owner</th><th>Baseline</th><th>No-action scenario</th><th>Finish shift</th><th>After recommended response</th><th>Dependency signal</th></tr></thead><tbody id="taskRows"><tr><td colspan="6">Loading schedule…</td></tr></tbody></table>
+      <table class="schedule"><thead><tr><th>Activity / owner</th><th>Baseline</th><th>No-action scenario</th><th>Finish shift</th><th>Total float (baseline → scenario)</th><th>After recommended response</th><th>Dependency signal</th></tr></thead><tbody id="taskRows"><tr><td colspan="7">Loading schedule…</td></tr></tbody></table>
     </div>
   </section>
 
@@ -179,7 +179,10 @@ function renderTasks(result){
     if(task.downstream_of_disruption || task.id===result.disrupted_activity_id) flags.push('In impact cone');
     if(task.on_shocked_critical_chain) flags.push('Shock critical path');
     if(!flags.length) flags.push('No finish impact');
-    rows+='<tr class="'+(task.on_shocked_critical_chain?'onpath':'')+'"><td><div class="taskname">'+safeText(task.id)+' · '+safeText(task.name)+'</div><div class="taskowner">'+safeText(task.owner)+' · '+task.duration+' planned days</div></td><td>D'+task.baseline_start_day+'–D'+task.baseline_finish_day+'</td><td>D'+task.shocked_start_day+'–D'+task.shocked_finish_day+'</td><td class="delta '+(shift>0?'warn':'muted')+'">'+(shift>0?'+'+shift+'d':(shift<0?shift+'d':'—'))+'</td><td><div>D'+task.recommended_start_day+'–D'+task.recommended_finish_day+'</div><div class="barcell"><div class="mini-track" style="margin-top:5px"><div class="basebar" style="width:'+barBase+'%"></div><div class="shockbar" style="width:'+barShock+'%;opacity:.62"></div><div class="recbar" style="width:'+barRec+'%;opacity:.95"></div></div></div></td><td><span class="badge">'+safeText(flags.join(' · '))+'</span></td></tr>';
+    var baseFloat=task.baseline_total_float_days;
+    var shockFloat=task.shocked_total_float_days;
+    var floatLabel=task.on_shocked_critical_chain?'Critical in scenario':'Float available';
+    rows+='<tr class="'+(task.on_shocked_critical_chain?'onpath':'')+'"><td><div class="taskname">'+safeText(task.id)+' · '+safeText(task.name)+'</div><div class="taskowner">'+safeText(task.owner)+' · '+task.duration+' planned days</div></td><td>D'+task.baseline_start_day+'–D'+task.baseline_finish_day+'</td><td>D'+task.shocked_start_day+'–D'+task.shocked_finish_day+'</td><td class="delta '+(shift>0?'warn':'muted')+'">'+(shift>0?'+'+shift+'d':(shift<0?shift+'d':'—'))+'</td><td><span class="badge">'+baseFloat+'d → '+shockFloat+'d</span><div class="taskowner">'+floatLabel+'</div></td><td><div>D'+task.recommended_start_day+'–D'+task.recommended_finish_day+'</div><div class="barcell"><div class="mini-track" style="margin-top:5px"><div class="basebar" style="width:'+barBase+'%"></div><div class="shockbar" style="width:'+barShock+'%;opacity:.62"></div><div class="recbar" style="width:'+barRec+'%;opacity:.95"></div></div></div></td><td><span class="badge">'+safeText(flags.join(' · '))+'</span></td></tr>';
   });
   document.getElementById('taskRows').innerHTML=rows;
 }
@@ -215,7 +218,9 @@ function render(result){
   document.getElementById('bestSlip').textContent=(result.recommended_slip_days>0?'+'+result.recommended_slip_days+' days vs baseline':'On / ahead of baseline');
   document.getElementById('baselineChain').innerHTML=chainMarkup(result.baseline_critical_chain,result,true);
   var shockChain=chainMarkup(result.shocked_critical_chain,result,false);
-  document.getElementById('pathDiff').innerHTML='<div style="margin-bottom:8px"> <strong style="color:#dce6ef">Baseline:</strong> '+result.baseline_critical_chain.map(safeText).join(' → ')+'</div><div style="margin-bottom:8px"><strong style="color:#dce6ef">After disruption:</strong> '+result.shocked_critical_chain.map(safeText).join(' → ')+'</div><div class="muted">Impact trace contains '+result.impacted_activity_ids.length+' task(s), including the disrupted task and downstream activities.</div>';
+  var baselinePaths=(result.baseline_critical_paths||[result.baseline_critical_chain]).map(function(path,index){return '<div class="footnote" style="margin:4px 0">CP'+(index+1)+': '+path.map(safeText).join(' → ')+'</div>';}).join('');
+  var shockedPaths=(result.shocked_critical_paths||[result.shocked_critical_chain]).map(function(path,index){return '<div class="footnote" style="margin:4px 0">CP'+(index+1)+': '+path.map(safeText).join(' → ')+'</div>';}).join('');
+  document.getElementById('pathDiff').innerHTML='<div style="margin-bottom:10px"><strong style="color:#dce6ef">Baseline critical paths ('+(result.baseline_critical_path_count||1)+'):</strong>'+baselinePaths+'</div><div style="margin-bottom:10px"><strong style="color:#dce6ef">After disruption ('+(result.shocked_critical_path_count||1)+'):</strong>'+shockedPaths+'</div><div class="muted">Impact trace contains '+result.impacted_activity_ids.length+' task(s), including the disrupted task and downstream activities. Total float is calculated with a CPM backward pass; zero-float tasks are highlighted as critical. '+(result.critical_paths_truncated?'Only a bounded sample of critical paths is displayed.':'')+'</div>';
   renderRobustness(result.sensitivity);
   renderActions(result);
   renderTasks(result);
