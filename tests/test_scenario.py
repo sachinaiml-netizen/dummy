@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 
-from app.decision_engine import simulate_project
+from app.decision_engine import analyze_schedule, simulate_project
 from app.main import app
 
 client = TestClient(app)
@@ -103,3 +103,99 @@ def test_vercel_config_includes_runtime_dashboard_asset():
     config = json.loads(Path("vercel.json").read_text(encoding="utf-8"))
     assert config["framework"] == "fastapi"
     assert config["functions"]["app/main.py"]["includeFiles"] == "static/**"
+
+
+
+def test_baseline_schedule_reports_float_for_near_critical_activities():
+    result = simulate_project("PR-01", 14, 4.5)
+    activities = {item["id"]: item for item in result["activities"]}
+    assert activities["ST-01"]["baseline_total_float_days"] == 0
+    assert activities["FC-01"]["baseline_total_float_days"] == 0
+    assert activities["ME-01"]["baseline_total_float_days"] == 6
+    assert activities["PR-01"]["baseline_total_float_days"] == 15
+    assert result["baseline_critical_path_count"] == 1
+
+
+def test_analyzer_accepts_unsorted_tasks_and_preserves_tied_critical_paths():
+    tasks = [
+        {"id": "finish", "duration": 1, "predecessors": ["left", "right"]},
+        {"id": "right", "duration": 4, "predecessors": []},
+        {"id": "short", "duration": 1, "predecessors": []},
+        {"id": "left", "duration": 4, "predecessors": []},
+    ]
+    result = analyze_schedule(tasks)
+    assert result["project_finish"] == 5
+    assert result["critical_path_count"] == 2
+    assert result["critical_paths"] == [["right", "finish"], ["left", "finish"]]
+    assert result["total_float"]["short"] == 4
+    assert result["topological_order"].index("finish") > result["topological_order"].index("left")
+    assert result["topological_order"].index("finish") > result["topological_order"].index("right")
+
+
+def test_analyzer_reports_multiple_terminal_activities_against_shared_project_finish():
+    tasks = [
+        {"id": "critical", "duration": 8, "predecessors": []},
+        {"id": "short", "duration": 3, "predecessors": []},
+    ]
+    result = analyze_schedule(tasks)
+    assert result["project_finish"] == 8
+    assert result["critical_paths"] == [["critical"]]
+    assert result["total_float"]["critical"] == 0
+    assert result["total_float"]["short"] == 5
+
+
+def test_analyzer_rejects_unknown_predecessor():
+    tasks = [{"id": "A", "duration": 2, "predecessors": ["MISSING"]}]
+    try:
+        analyze_schedule(tasks)
+    except ValueError as exc:
+        assert "Unknown predecessor" in str(exc)
+    else:
+        raise AssertionError("Unknown predecessor should be rejected")
+
+
+def test_analyzer_rejects_dependency_cycles():
+    tasks = [
+        {"id": "A", "duration": 2, "predecessors": ["B"]},
+        {"id": "B", "duration": 3, "predecessors": ["A"]},
+    ]
+    try:
+        analyze_schedule(tasks)
+    except ValueError as exc:
+        assert "Dependency cycle detected" in str(exc)
+    else:
+        raise AssertionError("A cyclic dependency graph should be rejected")
+
+
+def test_analyzer_rejects_duplicate_ids_and_non_positive_duration():
+    try:
+        analyze_schedule([
+            {"id": "A", "duration": 1, "predecessors": []},
+            {"id": "A", "duration": 2, "predecessors": []},
+        ])
+    except ValueError as exc:
+        assert "Duplicate task id" in str(exc)
+    else:
+        raise AssertionError("Duplicate task IDs should be rejected")
+
+    try:
+        analyze_schedule([{"id": "A", "duration": 0, "predecessors": []}])
+    except ValueError as exc:
+        assert "positive finite number" in str(exc)
+    else:
+        raise AssertionError("Zero duration should be rejected")
+
+
+def test_analyzer_bounds_materialized_critical_paths_but_reports_exact_count():
+    tasks = [
+        {"id": "merge2", "duration": 1, "predecessors": ["left2", "right2"]},
+        {"id": "left2", "duration": 1, "predecessors": ["left1"]},
+        {"id": "right2", "duration": 1, "predecessors": ["right1"]},
+        {"id": "left1", "duration": 1, "predecessors": ["start"]},
+        {"id": "right1", "duration": 1, "predecessors": ["start"]},
+        {"id": "start", "duration": 1, "predecessors": []},
+    ]
+    result = analyze_schedule(tasks, max_paths_to_return=1)
+    assert result["critical_path_count"] == 4
+    assert len(result["critical_paths"]) == 1
+    assert result["critical_paths_truncated"] is True
