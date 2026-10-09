@@ -40,3 +40,12 @@
 ### Change record
 
 This log is itself part of iteration 1. Append timestamped entries rather than rewriting prior results. Every claim about deployment must distinguish configuration, successful build, HTTP availability, and end-to-end scenario verification.
+
+
+## 2026-10-09 19:20 IST — Vercel bundle-size blocker and response
+
+- A direct, unlinked Vercel deployment was created under the connected default account. The build failed with `LAMBDA_SIZE_EXCEEDED`: 239.84 MB reported bundle versus a 225 MB function limit.
+- Vercel's error explicitly stated that the custom install command prevented automatic function bundle optimisation.
+- Repository review identified NumPy and scikit-learn as runtime dependencies used only by the legacy snapshot-risk heuristic. The core Project Impact Lab scheduling engine does not require them, and the synthetic Isolation Forest was not validated against real project data.
+- Selected fix: replace only that unvalidated synthetic anomaly detector with a bounded, explainable rule-based deviation index; preserve the /risk JSON field for compatibility; split test-only packages into requirements-dev.txt; let Vercel auto-detect and optimise installation by removing the custom install command on the next deployment.
+- Verification at the time of this entry: the previous main CI passed, and the failed deployment itself is recorded as not usable. End-to-end public preview remains unverified until a subsequent build and live route checks pass.
