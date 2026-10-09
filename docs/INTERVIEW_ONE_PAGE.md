@@ -46,14 +46,20 @@ JavaScript updates the dashboard
 - **Scheduling maths — `app/decision_engine.py`:** validates the activity network, orders dependencies, calculates early/late dates and total float, and identifies critical paths.
 - **Tests — `tests/test_scenario.py`:** verify expected results and edge cases. CI runs these tests automatically when code changes.
 
-## 5. Four terms to know
+## 5. Optional configurable-schedule demo
+
+If the interviewer asks whether this works only with the built-in example, click “Load sample” in the CSV intake panel, then “Validate & load”. The app validates the sample schedule, shows its baseline CPM result and lets you select an activity and inject a delay. You can upload your own small CSV in the same format.
+
+Required columns: `task_id`, `task_name`, `duration_days`, `predecessors`. Separate multiple predecessor IDs with `|`. Optional columns are `owner` and `stream`. It rejects duplicate IDs, invalid durations, unknown predecessors and cycles. It does **not** parse native Primavera P6 XER/XML, connect to Prestige, or validate calendars/resources/contract rules. Do not upload confidential data.
+
+## 6. Four terms to know
 
 - **Activity:** a piece of work with an estimated duration.
 - **Dependency:** a rule that one activity must happen before another.
 - **Total float:** in this simplified model, the time an activity can move without moving the modeled project finish.
 - **Critical path:** a connected path of activities that controls the earliest modeled finish. If two paths tie, both matter.
 
-## 6. What the recovery-value number means
+## 7. What the recovery-value number means
 
 The demo uses:
 
@@ -63,32 +69,32 @@ Example: `6 × ₹4.5 lakh − ₹8 lakh = ₹19 lakh`.
 
 Both money inputs are placeholders. This is arithmetic for comparing scenarios, **not actual savings, a business case, or a recommendation to execute the action**. A project lead must validate safety, staffing, feasibility, contract conditions and cost data.
 
-## 7. What is genuinely different—and what is not
+## 8. What is genuinely different—and what is not
 
 CPM, total float, multiple critical paths, BIM, digital twins and AI-assisted construction risk analysis already exist in commercial products and large construction organisations. Do not claim this prototype is globally unique or better than Primavera, Autodesk Forma or Bentley.
 
 The testable idea is narrower: **does one clear 14/15/16-day threshold walkthrough help a user explain float erosion and the handover consequence more quickly or consistently than their existing workflow?** If their current tools already do this equally well, this prototype has not shown additional value.
 
-## 8. If asked, “Where is the AI?”
+## 9. If asked, “Where is the AI?”
 
 “The current schedule calculation is deterministic CPM, not a trained AI model. I used AI as a coding assistant, researched the problem, narrowed the feature, reviewed the logic and tests, and am learning the code paths so I can explain the design and limitations. I would only add predictive ML if approved historical data and testing showed it improved on this transparent baseline.”
 
 Do not claim that you personally typed every line if AI generated or revised code.
 
-## 9. Three honest limitations
+## 10. Three honest limitations
 
 1. The task network and cost assumptions are synthetic.
 2. The engine does not yet model work calendars, lags, resource constraints, site conditions or contract rules.
 3. It is not connected to Prestige's systems or data and does not replace a scheduler.
 
-## 10. Files to open if asked
+## 11. Files to open if asked
 
 1. `docs/PROBLEM_STATEMENT.md` — business problem and example.
 2. `static/index.html` — visible interface and browser-to-API flow.
 3. `app/main.py` — API routes.
 4. `app/schemas.py` — request validation.
-5. `app/decision_engine.py` — scheduling logic and assumptions.
-6. `tests/test_scenario.py` — evidence the expected cases are tested.
+5. `app/decision_engine.py` — scheduling logic and CSV adapter.
+6. `tests/test_scenario.py` and `tests/test_csv_schedule.py` — evidence the expected cases are tested.
 7. `docs/architecture.md` — deeper technical details.
 
 **Interview rule:** explain the problem first, show the three thresholds second, explain the data flow third, and state the limitations before making any claim about business value.
