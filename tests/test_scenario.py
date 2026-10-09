@@ -257,3 +257,48 @@ def test_analyzer_rejects_surrounding_whitespace_in_ids_and_invalid_override_sha
         assert "duration_overrides must be a dictionary" in str(exc)
     else:
         raise AssertionError("An invalid duration override container should be rejected")
+
+
+
+def test_near_critical_procurement_delay_explains_remaining_float_before_handover_moves():
+    result = simulate_project("PR-01", 14, 4.5)
+    assert result["baseline_finish_day"] == 119
+    assert result["shocked_finish_day"] == 119
+    assert result["shocked_slip_days"] == 0
+    assert result["disrupted_activity_baseline_total_float_days"] == 15
+    assert result["disrupted_activity_scenario_total_float_days"] == 1
+    assert result["disrupted_activity_float_consumed_days"] == 14
+    assert "consumed 14 of its 15 original float" in result["key_insight"]
+    assert "only 1 day(s) of float remain" in result["key_insight"]
+
+
+def test_exhausting_float_makes_a_second_path_critical_before_finish_moves():
+    result = simulate_project("PR-01", 15, 4.5)
+    assert result["baseline_finish_day"] == 119
+    assert result["shocked_finish_day"] == 119
+    assert result["shocked_slip_days"] == 0
+    assert result["disrupted_activity_scenario_total_float_days"] == 0
+    assert result["shocked_critical_path_count"] == 2
+    assert "consumed all 15 day(s) of its original float" in result["key_insight"]
+    assert "one additional day of delay would move modeled handover" in result["key_insight"]
+
+
+def test_delay_one_day_past_available_float_moves_modeled_handover():
+    result = simulate_project("PR-01", 16, 4.5)
+    assert result["baseline_finish_day"] == 119
+    assert result["shocked_finish_day"] == 120
+    assert result["shocked_slip_days"] == 1
+    assert result["disrupted_activity_baseline_total_float_days"] == 15
+    assert result["disrupted_activity_scenario_total_float_days"] == 0
+    assert "exceeds its original 15-day total float by 1 day(s)" in result["key_insight"]
+    assert "handover moves by 1 day(s), to Day 120" in result["key_insight"]
+
+
+def test_default_scenario_exposes_explicit_float_fields_without_changing_recommendation():
+    result = simulate_project("ST-01", 14, 4.5)
+    assert result["disrupted_activity_baseline_total_float_days"] == 0
+    assert result["disrupted_activity_scenario_total_float_days"] == 0
+    assert result["disrupted_activity_float_consumed_days"] == 0
+    structure = next(item for item in result["activities"] if item["id"] == "ST-01")
+    assert structure["total_float_change_days"] == 0
+    assert result["recommended_action"]["id"] == "structural_recovery"
