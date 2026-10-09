@@ -1,10 +1,26 @@
 # Monday Interview Playbook — Project Impact Lab
 
+## The problem statement to lead with
+
+“On a construction schedule, an activity can be delayed without moving handover immediately because it still has total float. But once that buffer is used up, the activity can become critical and a further delay can move handover. Project Impact Lab lets a project-controls user inject a delay, see remaining float and the affected path, then compare a few recovery options with explicit assumptions. The example is synthetic, and the purpose is to test whether this simple explanation adds value alongside the team's existing scheduling tools.”
+
+This is the core problem; do not start with AI or the dashboard. AI is not the engine of the current CPM simulation.
+
 ## The 30-second pitch
 
 “I started with an AI project-risk dashboard, then noticed that risk dashboards already exist in construction software. I changed the question: when an activity is delayed, does it actually move the project handover date, and which recovery action is worth paying for? Project Impact Lab models a dependency network, injects a delay, propagates the effect to dependent work, then compares candidate actions using transparent cost assumptions. Everything in this demo is synthetic. I want to validate whether this decision-rehearsal layer would be useful on approved historical schedules.”
 
 Do not call it a trained prediction model. The current decision engine is a deterministic critical-path simulator.
+
+## The demo's strongest, easiest-to-explain case
+
+Choose **Test schedule float** and inject a 14-day procurement delay. Baseline total float is 15 days; the new scenario shows one day left. The project finish remains Day 119, but the buffer is almost gone. At 15 days, that path becomes co-critical; at 16 days, the simplified model moves handover to Day 120. This is the clearest story because the user can explain all three outcomes with one concept: float.
+
+Do not call this market-unique. Oracle Primavera Cloud already supports critical paths, total float and multiple float paths. The hypothesis is whether this particular transparent delay-to-decision flow is useful beside existing tools.
+
+## Study this before the interview
+
+Follow the [six-hour learning guide](SIX_HOUR_LEARNING_GUIDE.md) and read the [problem statement](PROBLEM_STATEMENT.md). Those two documents are the priority; do not begin by memorising the entire codebase.
 
 ## The three-minute demo
 
