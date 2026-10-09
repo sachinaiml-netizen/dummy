@@ -24,3 +24,9 @@ class ScenarioRequest(BaseModel):
     disrupted_activity_id: str = Field(default="ST-01", min_length=1, max_length=20)
     delay_days: int = Field(default=14, ge=0, le=60)
     exposure_lakh_per_day: float = Field(default=4.5, ge=0, le=100)
+
+
+class CsvScheduleRequest(BaseModel):
+    csv_text: str = Field(min_length=1, max_length=250000)
+    disrupted_task_id: str | None = Field(default=None, max_length=80)
+    delay_days: int = Field(default=0, ge=0, le=60)
