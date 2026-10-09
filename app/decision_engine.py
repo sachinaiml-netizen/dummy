@@ -604,6 +604,8 @@ def analyze_schedule_csv(
                 continue
 
             def field(key: str) -> str:
+                if key not in header_map:
+                    return ""
                 value = row.get(header_map[key])
                 if value is None:
                     return ""
