@@ -189,8 +189,8 @@ def test_analyzer_rejects_duplicate_ids_and_non_positive_duration():
 def test_analyzer_bounds_materialized_critical_paths_but_reports_exact_count():
     tasks = [
         {"id": "merge2", "duration": 1, "predecessors": ["left2", "right2"]},
-        {"id": "left2", "duration": 1, "predecessors": ["left1"]},
-        {"id": "right2", "duration": 1, "predecessors": ["right1"]},
+        {"id": "left2", "duration": 1, "predecessors": ["left1", "right1"]},
+        {"id": "right2", "duration": 1, "predecessors": ["left1", "right1"]},
         {"id": "left1", "duration": 1, "predecessors": ["start"]},
         {"id": "right1", "duration": 1, "predecessors": ["start"]},
         {"id": "start", "duration": 1, "predecessors": []},
@@ -223,4 +223,4 @@ def test_api_returns_total_float_and_critical_path_count():
     assert data["baseline_critical_path_count"] == 1
     procurement = next(item for item in data["activities"] if item["id"] == "PR-01")
     assert procurement["baseline_total_float_days"] == 15
-    assert procurement["shocked_total_float_days"] == 15
+    assert procurement["shocked_total_float_days"] == 29  # structural delay moves the modeled project finish
