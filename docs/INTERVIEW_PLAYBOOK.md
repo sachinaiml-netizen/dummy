@@ -14,7 +14,7 @@ Do not call it a trained prediction model. The current decision engine is a dete
 
 ## The demo's strongest, easiest-to-explain case
 
-Choose **Test schedule float** and inject a 14-day procurement delay. Baseline total float is 15 days; the new scenario shows one day left. The project finish remains Day 119, but the buffer is almost gone. At 15 days, that path becomes co-critical; at 16 days, the simplified model moves handover to Day 120. This is the clearest story because the user can explain all three outcomes with one concept: float.
+Use the one-click procurement presets. Baseline procurement float is 15 days: +14 days leaves 1 day of float; +15 days exhausts the buffer and makes the procurement/MEP route co-critical; +16 days moves modeled handover from Day 119 to Day 120. Explain these as three points on the same threshold, not as three unrelated predictions.
 
 Do not call this market-unique. Oracle Primavera Cloud already supports critical paths, total float and multiple float paths. The hypothesis is whether this particular transparent delay-to-decision flow is useful beside existing tools.
 
@@ -40,12 +40,15 @@ Say clearly: “These numbers are synthetic. The value is not the ₹19 lakh its
 
 ### 3. Run the schedule-float case (45 seconds)
 
-- Click “Test schedule float”.
-- The disruption moves to long-lead procurement with a 14-day delay.
+- Click “Procurement +14d · 1d left”.
+- The disruption is long-lead procurement with a 14-day delay.
 - Handover remains at Day 119 because the facade chain still controls the modeled finish.
 - The system should select no paid action for finish-date recovery under these assumptions.
 
-Say: “This is the counterexample. A late task is not automatically a project-level delay. Spending ₹12 lakh to expedite a task that does not move the finish date is not justified by this model.”
+Say: “This is the counterexample. A late task is not automatically a project-level delay. It has consumed most of its buffer, but under these assumptions it has not moved handover yet.”
+
+- Click “Procurement +15d · zero float”: show zero float and two critical paths, while handover remains on Day 119.
+- Click “Procurement +16d · handover +1d”: show the finish moves to Day 120.
 
 ### 4. Show recommendation stability (30 seconds)
 
@@ -62,11 +65,15 @@ Say: “This is the counterexample. A late task is not automatically a project-l
 
 ### “Isn't this already available in Autodesk or Primavera?”
 
-“Those platforms already provide risk analytics and schedule/risk simulation. I am not claiming to replace them or that this capability is unique globally. My hypothesis is narrower: an explainable layer that compares a small set of recovery actions against the actual dependency path and transparent cost assumptions may help a decision-maker compare options. That hypothesis needs to be validated against the team's current workflow.”
+“CPM, float paths and risk-response analysis already exist in mature tools such as Primavera, so I do not claim the algorithm is unique. My prototype focuses on an easy-to-follow 14/15/16-day threshold walkthrough: buffer remaining, a path becoming co-critical, and the finish date moving. Whether that adds value beside your current tools is a hypothesis I would validate with the project-controls team.”
+
+### “Why did you choose this problem for Prestige?”
+
+“Industry coverage in April 2026 reported a multi-year Prestige–Autodesk digital-transformation collaboration. I took that as a reason to study connected design and construction workflows, not as proof that I know Prestige's internal problems. I built a small companion-style demo and want to ask whether a clear float-threshold explanation is useful in your team's current workflow—or already solved well by your existing tools.”
 
 ### “Where is the AI?”
 
-“In this version, the decision engine is not an AI model; it is deterministic graph and critical-path logic. That is deliberate because I have no authorized, labelled Prestige project history to train or validate a model. The separate /risk endpoint uses a bounded, deterministic rule-based deviation indicator, not an ML anomaly detector or a probability. I removed the synthetic Isolation Forest because a model fitted to generated 'normal' data gives no evidence of real-world validity and adds substantial deployment dependencies. With permissioned historical data, I would first test whether a calibrated ML approach improves on this transparent baseline. With permissioned historical data, I would first build a basic schedule-variance baseline, use time-aware validation, then test whether ML improves decision quality over that baseline.”
+“In this version, the decision engine is not an AI model; it is deterministic graph and critical-path logic. That is deliberate because I have no authorized, labelled Prestige project history to train or validate a model. The separate /risk endpoint uses a bounded, deterministic rule-based deviation indicator, not an ML anomaly detector or a probability. I removed the synthetic Isolation Forest because a model fitted to generated 'normal' data gives no evidence of real-world validity and adds substantial deployment dependencies. With permissioned historical data, I would first build a schedule-variance baseline, use time-aware validation, and test whether ML improves decision quality over that baseline.”
 
 ### “How does the calculation work?”
 
@@ -132,7 +139,8 @@ Discuss compensation after the role scope, employment type, expected contributio
 
 ## Before Monday, 5 p.m.
 
-- Run the app locally and click both demo scenarios without referring to notes.
+- Run the app locally and click all four one-click presets without referring to notes.
+- Practise the float sequence: procurement +14d leaves 1 day; +15d leaves 0 and creates two critical paths; +16d moves handover one day.
 - Explain the forward-pass/critical-path method on paper.
 - Be ready to calculate 6 × ₹4.5L − ₹8L = ₹19L aloud.
 - Practice the Autodesk/Primavera objection until you can state the differentiation without claiming novelty the market does not support.
