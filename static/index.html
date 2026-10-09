@@ -12,6 +12,31 @@
 .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:0 0 18px}.kpi{padding:16px 18px;border:1px solid var(--line);background:linear-gradient(150deg,#121d29,#0e1721);border-radius:13px;min-height:105px}.kpi .label{font-size:10px;letter-spacing:.11em;color:var(--muted);text-transform:uppercase;font-weight:800}.kpi .value{font-size:28px;letter-spacing:-.05em;font-weight:750;margin-top:7px}.kpi .sub{font-size:10px;color:var(--muted);margin-top:2px}.accent{color:var(--lime)}.warn{color:var(--orange)}.bad{color:var(--red)}
 .layout{display:grid;grid-template-columns:320px minmax(0,1fr);gap:16px;align-items:start}.panel{border:1px solid var(--line);border-radius:15px;background:linear-gradient(160deg,#121e2b,#101821);overflow:hidden;box-shadow:var(--shadow)}.panelhead{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px}.panelhead h3{font-size:13px;margin:0;letter-spacing:-.01em}.index{color:var(--lime);font-size:10px;font-weight:900;letter-spacing:.14em}.panelbody{padding:18px}.control{margin-bottom:21px}.control label{display:flex;justify-content:space-between;gap:8px;font-size:11px;font-weight:750;margin-bottom:9px}.hint{font-size:10px;font-weight:400;color:var(--muted)}select,input[type=number]{width:100%;background:#0b131c;color:var(--ink);border:1px solid #2a3a4d;border-radius:9px;padding:11px 10px;font:inherit;font-size:12px;outline:none}select:focus,input:focus{border-color:var(--lime)}input[type=range]{width:100%;accent-color:var(--lime);cursor:pointer}.range-meta{display:flex;justify-content:space-between;color:#71859b;font-size:10px;margin-top:4px}.range-current{color:var(--lime);font-size:13px;font-weight:850}.btn{border:0;border-radius:9px;padding:11px 13px;font:inherit;font-size:11px;font-weight:800;cursor:pointer;transition:transform .15s,opacity .15s}.btn:active{transform:translateY(1px)}.btn-primary{background:var(--lime);color:#172112;width:100%}.btn-secondary{background:#1d2d3e;color:#d2ddeb;border:1px solid #304358}.btn:disabled{opacity:.5;cursor:wait}.quick{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:9px}.quick .btn{width:100%;min-height:38px;padding:8px 6px;font-size:10px;line-height:1.35}.assumption{border-top:1px solid var(--line);padding-top:14px;color:var(--muted);font-size:10px}.rightcol{display:grid;gap:16px;min-width:0}.analysisgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.insight{border:1px solid #465c37;background:linear-gradient(120deg,#1d2a24,#151f24);border-radius:12px;padding:15px 16px;margin-bottom:15px}.insight .mini{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--lime);font-weight:900}.insight p{font-size:12px;line-height:1.6;margin:7px 0 0;color:#dce6df}.chain{display:flex;align-items:stretch;gap:6px;overflow-x:auto;padding:2px 0 8px}.node{min-width:105px;flex:1;position:relative;border:1px solid #2b4052;background:#0e1923;border-radius:10px;padding:10px 9px}.node+ .node:before{content:"›";position:absolute;left:-8px;top:24px;color:var(--lime);font-size:18px;font-weight:900;z-index:1}.node.critical{border-color:#8aab4c;background:linear-gradient(150deg,#28351f,#17241e)}.node.impacted{border-color:#8c5940;background:linear-gradient(150deg,#33271f,#1e1b1a)}.nodeid{font-size:9px;letter-spacing:.1em;color:var(--muted);font-weight:800}.nodename{font-size:10px;font-weight:850;margin:5px 0 8px;line-height:1.3;min-height:25px}.nodefinish{font-size:11px;color:var(--lime);font-weight:800}.nodesub{font-size:9px;color:var(--muted)}.sectionlabel{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;font-weight:900;margin-bottom:10px}.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:10px;color:var(--muted);margin-top:8px}.legend span{display:flex;align-items:center;gap:6px}.key{width:8px;height:8px;border-radius:2px;display:inline-block;background:var(--lime)}.key.orange{background:var(--orange)}.key.blue{background:var(--blue)}.muted{color:var(--muted)}.splitstats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}.stat{background:#0d1721;border:1px solid #263648;border-radius:10px;padding:12px}.statlabel{font-size:9px;text-transform:uppercase;color:var(--muted);letter-spacing:.1em}.statvalue{font-size:22px;margin-top:5px;font-weight:800;letter-spacing:-.04em}.statdesc{font-size:10px;color:var(--muted);margin-top:4px}.smalltitle{font-size:12px;font-weight:850;margin:0 0 10px}.leaderboard{width:100%;border-collapse:collapse;font-size:11px}.leaderboard th{text-align:left;color:var(--muted);font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:10px 9px;border-bottom:1px solid #2a3b4d}.leaderboard td{padding:11px 9px;border-bottom:1px solid #223142;vertical-align:top}.leaderboard tr:last-child td{border-bottom:0}.leaderboard tr.best{background:rgba(201,243,106,.055)}.bestlabel{font-size:9px;font-weight:900;color:var(--lime);text-transform:uppercase;letter-spacing:.1em}.actionname{font-weight:800;color:#e5edf6}.actionmeta{color:var(--muted);font-size:10px;margin-top:3px;line-height:1.4}.moneypos{color:var(--lime);font-weight:850;white-space:nowrap}.moneyneg{color:var(--orange);font-weight:800;white-space:nowrap}.neutral{color:#b0c0cf;font-weight:800}.badge{display:inline-block;border:1px solid #314357;background:#0d1620;color:#b9c8d8;border-radius:6px;padding:4px 6px;font-size:9px;white-space:nowrap}.schedule-wrap{overflow-x:auto}.schedule{border-collapse:collapse;width:100%;min-width:820px;font-size:11px}.schedule th{text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:800;padding:10px 11px;border-bottom:1px solid #2b3b4d}.schedule td{padding:11px;border-bottom:1px solid #223040}.schedule tr:last-child td{border-bottom:0}.schedule tr.onpath{background:rgba(201,243,106,.04)}.taskname{font-weight:800}.taskowner{font-size:10px;color:var(--muted);margin-top:2px}.delta{font-weight:850}.barcell{min-width:160px}.mini-track{height:7px;background:#283647;border-radius:99px;overflow:hidden;position:relative}.basebar{position:absolute;left:0;top:0;height:100%;background:#4f708a;border-radius:99px;opacity:.9}.shockbar{position:absolute;left:0;top:0;height:100%;background:var(--orange);border-radius:99px;opacity:.9}.recbar{position:absolute;left:0;top:0;height:100%;background:var(--lime);border-radius:99px;opacity:.9}.footgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.listclean{padding-left:15px;margin:0;color:#aab9c8;font-size:11px}.listclean li{margin:7px 0;line-height:1.5}.footnote{font-size:10px;color:#8192a7;line-height:1.6}.footer{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-top:18px;padding:12px 4px 0;border-top:1px solid #203040;color:#667b92;font-size:10px}.error{border:1px solid #8c4545;background:#2b191c;color:#ffc3c3;border-radius:8px;padding:10px;font-size:11px;display:none;margin-bottom:12px}
 .robustness{margin-top:14px;padding:12px;border:1px solid #2d4153;background:#0d1721;border-radius:10px}.robusthead{display:flex;justify-content:space-between;align-items:center;gap:10px}.robusttitle{font-size:11px;font-weight:850}.robustflag{border-radius:5px;padding:4px 6px;font-size:9px;font-weight:900;letter-spacing:.06em}.robustflag.stable{border:1px solid #55713b;background:#1c2a1c;color:var(--lime)}.robustflag.sensitive{border:1px solid #7a5b39;background:#2b2118;color:var(--orange)}.robustdesc{font-size:10px;color:var(--muted);line-height:1.55;margin-top:7px}.robustmeter{height:6px;background:#283748;border-radius:99px;overflow:hidden;margin-top:10px}.robustfill{height:100%;border-radius:99px;background:var(--lime)}.robustfill.sensitive{background:var(--orange)}.robustchips{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}.robustchip{border:1px solid #2b3c4d;background:#111e2b;border-radius:6px;color:#afc0d0;font-size:9px;padding:4px 6px}
+
+.csvintro{font-size:11px;line-height:1.6;color:#aebccd;max-width:900px}
+.csvgrid{display:grid;grid-template-columns:minmax(230px,.7fr) minmax(0,1.3fr);gap:16px;margin-top:16px}
+.csvbox{border:1px solid #293b4e;background:#0d1721;border-radius:11px;padding:14px}
+.csvbox label{display:block;font-size:11px;font-weight:800;margin-bottom:7px}
+.csvsmall{font-size:10px;color:var(--muted);line-height:1.6}
+.csvinput{width:100%;background:#0a131d;color:var(--ink);border:1px solid #2b4054;border-radius:8px;padding:10px;font:inherit;font-size:11px}
+.csvcontrols{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:10px;align-items:end;margin-top:12px}
+.csvbuttons{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.csvbuttons .btn{flex:1}
+.csvstatus{margin-top:10px;font-size:11px;color:var(--muted);line-height:1.55}
+.csvstatus.error{color:#ffc3c3;border:1px solid #854747;background:#29191d;padding:9px;border-radius:7px}
+.csvstatus.success{color:var(--lime)}
+.csvsummary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.csvsummary .stat{padding:10px}
+.csvsummary .statvalue{font-size:20px}
+.csvpaths{font-size:10px;line-height:1.7;color:#afc0cf;margin-top:7px;overflow-wrap:anywhere}
+.csvscroll{overflow:auto;max-height:340px}
+.csvtable{border-collapse:collapse;width:100%;min-width:590px;font-size:10px}
+.csvtable th{text-align:left;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-size:9px;padding:9px 8px;border-bottom:1px solid #2b3b4d;position:sticky;top:0;background:#111b27}
+.csvtable td{padding:9px 8px;border-bottom:1px solid #223142;vertical-align:top}
+.csvcritical{color:var(--lime);font-weight:800}
+@media(max-width:850px){.csvgrid{grid-template-columns:1fr}}
+@media(max-width:520px){.csvsummary{grid-template-columns:1fr}.csvcontrols{grid-template-columns:1fr}}
+
 @media(max-width:1050px){.hero{grid-template-columns:1fr}.problem-brief{grid-template-columns:1fr}.layout{grid-template-columns:1fr}.analysisgrid{grid-template-columns:1fr}.hero-copy h2{font-size:30px}}
 @media(max-width:680px){.wrap{padding:16px 12px 28px}.top{align-items:flex-start;flex-direction:column}.brand h1{font-size:21px}.kpis{grid-template-columns:1fr 1fr}.kpi .value{font-size:24px}.hero-copy,.thesis{padding:17px}.panelbody{padding:13px}.footgrid{grid-template-columns:1fr}.analysisgrid{gap:12px}}
 </style>
@@ -116,6 +141,49 @@
           <div style="padding:13px 18px;border-top:1px solid #223142" class="footnote">*Net value = modeled delay days recovered × the editable daily-exposure assumption − action cost. It is a sensitivity estimate, not a business case or guaranteed saving. A human project lead decides feasibility and execution.</div>
         </div>
       </section>
+    </div>
+  </section>
+
+  <div style="height:16px"></div>
+  <section class="panel" id="csvSchedulePanel">
+    <div class="panelhead"><h3>Analyse a schedule you provide</h3><span class="index">07 / CSV INTAKE</span></div>
+    <div class="panelbody">
+      <div class="csvintro">Move beyond the fixed demo network: upload a small task schedule, validate its dependencies, then simulate a delay using the same CPM engine. Accepted CSV columns are <code>task_id, task_name, duration_days, predecessors</code>; optional columns are <code>owner</code> and <code>stream</code>. Use <code>|</code> between multiple predecessor IDs.</div>
+      <div class="csvgrid">
+        <div class="csvbox">
+          <label for="csvFile">Choose a CSV schedule</label>
+          <input class="csvinput" type="file" id="csvFile" accept=".csv,text/csv">
+          <div class="csvsmall" id="csvFileName" style="margin-top:7px">No file selected.</div>
+          <div class="csvbuttons">
+            <button id="validateCsvButton" class="btn btn-primary" type="button">Validate & load</button>
+            <button id="loadSampleCsvButton" class="btn btn-secondary" type="button">Load sample</button>
+          </div>
+          <div class="csvsmall" style="margin-top:12px"><a href="/sample-schedule.csv" download style="color:var(--blue)">Download sample CSV</a></div>
+          <div class="csvsmall" style="margin-top:10px">The file is processed for this request and is not saved in an application database. Use synthetic or non-confidential data. This accepts the documented CSV adapter format, not native Primavera P6 XER/XML files.</div>
+          <div id="csvStatus" class="csvstatus" role="status" aria-live="polite">Load the sample or choose your own CSV to begin.</div>
+          <div class="csvcontrols">
+            <div><label for="csvDisruptedTask">Activity to delay</label><select class="csvinput" id="csvDisruptedTask" disabled><option value="">Validate a CSV first</option></select></div>
+            <div><label for="csvDelayDays">Delay (days)</label><input class="csvinput" id="csvDelayDays" type="number" min="0" max="60" step="1" value="14" disabled></div>
+          </div>
+          <div class="csvbuttons"><button id="runCsvScenarioButton" class="btn btn-primary" type="button" disabled>Run delay scenario →</button></div>
+        </div>
+        <div class="csvbox">
+          <div class="sectionlabel">Validation & scenario result</div>
+          <div id="csvOutputEmpty" class="csvsmall">The result will show the baseline finish, scenario finish, delay impact, total-float changes and critical path(s). Invalid IDs, missing predecessors, duplicate activities and dependency cycles are rejected with an error message.</div>
+          <div id="csvOutput" hidden>
+            <div class="insight" style="margin-bottom:12px"><div class="mini">What the uploaded schedule shows</div><p id="csvKeyInsight">Waiting for a valid schedule…</p></div>
+            <div class="csvsummary">
+              <div class="stat"><div class="statlabel">Activities</div><div class="statvalue" id="csvCount">—</div></div>
+              <div class="stat"><div class="statlabel">Baseline finish</div><div class="statvalue" id="csvBaselineFinish">—</div></div>
+              <div class="stat"><div class="statlabel">Scenario slip</div><div class="statvalue" id="csvSlip">—</div></div>
+            </div>
+            <div class="sectionlabel">Critical paths · baseline → scenario</div>
+            <div id="csvCriticalPaths" class="csvpaths"></div>
+            <div class="sectionlabel" style="margin-top:14px">Activity trace · total float</div>
+            <div class="csvscroll"><table class="csvtable"><thead><tr><th>Activity</th><th>Baseline finish</th><th>Scenario finish</th><th>Float</th><th>Signal</th></tr></thead><tbody id="csvTaskRows"></tbody></table></div>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -269,6 +337,132 @@ document.getElementById('criticalCase').addEventListener('click',function(){acti
 document.getElementById('float14Case').addEventListener('click',function(){activitySelect.value='PR-01';delayInput.value='14';recalculate();});
 document.getElementById('float15Case').addEventListener('click',function(){activitySelect.value='PR-01';delayInput.value='15';recalculate();});
 document.getElementById('float16Case').addEventListener('click',function(){activitySelect.value='PR-01';delayInput.value='16';recalculate();});
+
+
+var customCsvText = '';
+var customCsvReady = false;
+var csvFileInput = document.getElementById('csvFile');
+var validateCsvButton = document.getElementById('validateCsvButton');
+var loadSampleCsvButton = document.getElementById('loadSampleCsvButton');
+var runCsvScenarioButton = document.getElementById('runCsvScenarioButton');
+var csvDisruptedTask = document.getElementById('csvDisruptedTask');
+var csvDelayDays = document.getElementById('csvDelayDays');
+
+function setCsvStatus(message, kind){
+  var status=document.getElementById('csvStatus');
+  status.textContent=message;
+  status.className='csvstatus'+(kind?' '+kind:'');
+}
+function resetCsvOutput(){
+  customCsvReady=false;
+  csvDisruptedTask.disabled=true;
+  csvDelayDays.disabled=true;
+  runCsvScenarioButton.disabled=true;
+  document.getElementById('csvOutput').hidden=true;
+  document.getElementById('csvOutputEmpty').hidden=false;
+}
+function renderCsvResult(result){
+  document.getElementById('csvOutputEmpty').hidden=true;
+  document.getElementById('csvOutput').hidden=false;
+  document.getElementById('csvKeyInsight').textContent=result.key_insight;
+  document.getElementById('csvCount').textContent=result.activity_count;
+  document.getElementById('csvBaselineFinish').textContent='Day '+result.baseline_finish_day;
+  document.getElementById('csvSlip').textContent=(result.handover_slip_days>0?'+':'')+result.handover_slip_days+'d';
+  document.getElementById('csvSlip').className='statvalue '+(result.handover_slip_days>0?'warn':'accent');
+  var paths='<div style="margin-bottom:5px"><strong>Baseline ('+result.baseline_critical_path_count+')</strong></div>';
+  (result.baseline_critical_paths||[]).forEach(function(path,index){
+    paths+='<div>CP'+(index+1)+': '+path.map(safeText).join(' → ')+'</div>';
+  });
+  paths+='<div style="margin:9px 0 5px"><strong>Scenario ('+result.scenario_critical_path_count+')</strong></div>';
+  (result.scenario_critical_paths||[]).forEach(function(path,index){
+    paths+='<div>CP'+(index+1)+': '+path.map(safeText).join(' → ')+'</div>';
+  });
+  if(result.critical_paths_truncated) paths+='<div>Path display capped at 64 paths; exact counts are preserved.</div>';
+  document.getElementById('csvCriticalPaths').innerHTML=paths;
+  var rows='';
+  (result.activities||[]).forEach(function(task){
+    var signal=task.on_scenario_critical_path?'Critical path':(
+      task.baseline_total_float_days>0 && task.scenario_total_float_days<=3
+        ? (task.scenario_total_float_days===0?'Float exhausted':'Near-critical · '+task.scenario_total_float_days+'d left')
+        : 'Buffer available');
+    rows+='<tr><td><strong>'+safeText(task.task_id)+'</strong><div class="csvsmall">'+safeText(task.task_name)+'</div></td><td>D'+task.baseline_early_finish_day+'</td><td>D'+task.scenario_early_finish_day+'</td><td>'+task.baseline_total_float_days+'d → '+task.scenario_total_float_days+'d</td><td class="'+(task.on_scenario_critical_path?'csvcritical':'')+'">'+safeText(signal)+'</td></tr>';
+  });
+  document.getElementById('csvTaskRows').innerHTML=rows;
+}
+async function submitCsvAnalysis(disruptedId, delayDays){
+  if(!customCsvText){setCsvStatus('Choose a CSV file or load the sample first.','error');return;}
+  var requestBody={csv_text:customCsvText,disrupted_task_id:disruptedId||null,delay_days:Number(delayDays||0)};
+  validateCsvButton.disabled=true;
+  loadSampleCsvButton.disabled=true;
+  runCsvScenarioButton.disabled=true;
+  setCsvStatus('Validating dependencies and calculating the CPM schedule…','');
+  try{
+    var response=await fetch('/api/schedule/analyze-csv',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(requestBody)});
+    var body=await response.json();
+    if(!response.ok) throw new Error(body.detail || 'Schedule validation failed.');
+    renderCsvResult(body);
+    customCsvReady=true;
+    if(!disruptedId){
+      var oldValue=csvDisruptedTask.value;
+      csvDisruptedTask.innerHTML='';
+      (body.activities||[]).forEach(function(task){
+        var option=document.createElement('option');
+        option.value=task.task_id;
+        option.textContent=task.task_id+' · '+task.task_name;
+        csvDisruptedTask.appendChild(option);
+      });
+      var preferred=(body.activities||[]).find(function(task){return task.task_id==='PR-01';});
+      csvDisruptedTask.value=preferred?preferred.task_id:(oldValue || (body.activities[0]&&body.activities[0].task_id));
+      csvDisruptedTask.disabled=false;
+      csvDelayDays.disabled=false;
+      runCsvScenarioButton.disabled=false;
+      setCsvStatus('CSV valid: '+body.activity_count+' activities; baseline finish Day '+body.baseline_finish_day+'. Select a task and delay to run a scenario.','success');
+    }else{
+      setCsvStatus('Scenario recalculated from '+body.activity_count+' validated activities. No schedule is saved by this application.','success');
+    }
+  }catch(error){
+    resetCsvOutput();
+    setCsvStatus(error.message,'error');
+  }finally{
+    validateCsvButton.disabled=false;
+    loadSampleCsvButton.disabled=false;
+    runCsvScenarioButton.disabled=!customCsvReady;
+  }
+}
+csvFileInput.addEventListener('change',async function(){
+  resetCsvOutput();
+  var file=csvFileInput.files && csvFileInput.files[0];
+  if(!file){customCsvText='';document.getElementById('csvFileName').textContent='No file selected.';return;}
+  if(file.size>250000){customCsvText='';setCsvStatus('File is too large. Limit: 250,000 bytes.','error');return;}
+  try{
+    customCsvText=await file.text();
+    document.getElementById('csvFileName').textContent=file.name+' · '+file.size.toLocaleString()+' bytes';
+    setCsvStatus('File selected. Click “Validate & load” to check columns and dependencies.','');
+  }catch(error){
+    customCsvText='';
+    setCsvStatus('Could not read the selected file as text.','error');
+  }
+});
+validateCsvButton.addEventListener('click',function(){submitCsvAnalysis(null,0);});
+loadSampleCsvButton.addEventListener('click',async function(){
+  try{
+    var response=await fetch('/sample-schedule.csv');
+    if(!response.ok) throw new Error('Could not download the built-in sample schedule.');
+    customCsvText=await response.text();
+    csvFileInput.value='';
+    document.getElementById('csvFileName').textContent='Built-in synthetic sample · 8 activities';
+    resetCsvOutput();
+    await submitCsvAnalysis(null,0);
+  }catch(error){setCsvStatus(error.message,'error');}
+});
+runCsvScenarioButton.addEventListener('click',function(){
+  var selected=csvDisruptedTask.value;
+  var delay=Number(csvDelayDays.value);
+  if(!selected){setCsvStatus('Select an activity to delay.','error');return;}
+  if(!Number.isInteger(delay)||delay<0||delay>60){setCsvStatus('Delay must be a whole number between 0 and 60.','error');return;}
+  submitCsvAnalysis(selected,delay);
+});
+
 loadCatalog().then(recalculate).catch(function(error){setError(error.message+' Start the API with: uvicorn app.main:app --reload');});
 </script>
 </body>
