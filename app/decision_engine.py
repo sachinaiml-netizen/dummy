@@ -92,6 +92,95 @@ def _descendants(activity_id: str) -> list[str]:
     return [task["id"] for task in TASKS if task["id"] in descendants]
 
 
+
+def _selected_action_id(
+    disrupted_activity_id: str,
+    delay_days: int,
+    exposure_lakh_per_day: float,
+) -> str:
+    baseline_finish = _schedule()["finish"][FINAL_TASK_ID]
+    shocked_finish = _schedule(disrupted_activity_id, delay_days)["finish"][FINAL_TASK_ID]
+    slip_days = max(0, shocked_finish - baseline_finish)
+    rows: list[dict[str, Any]] = []
+    for action in INTERVENTIONS:
+        scenario = _schedule(
+            disrupted_activity_id,
+            delay_days,
+            action if action["id"] != "none" else None,
+        )
+        finish_day = scenario["finish"][FINAL_TASK_ID]
+        days_recovered = min(max(0, shocked_finish - finish_day), slip_days)
+        net_value = days_recovered * exposure_lakh_per_day - action["cost_lakh"]
+        rows.append({
+            "id": action["id"],
+            "days_recovered": days_recovered,
+            "net_value_lakh": round(net_value, 2),
+            "cost_lakh": action["cost_lakh"],
+        })
+    rows.sort(
+        key=lambda row: (row["net_value_lakh"], row["days_recovered"], -row["cost_lakh"]),
+        reverse=True,
+    )
+    best = rows[0]
+    if best["id"] == "none" or best["net_value_lakh"] <= 0:
+        return "none"
+    return best["id"]
+
+
+def _sensitivity_summary(
+    disrupted_activity_id: str,
+    delay_days: int,
+    exposure_lakh_per_day: float,
+) -> dict[str, Any]:
+    # A deterministic 3x3 stress grid, not a probability distribution or Monte Carlo model.
+    delays = sorted({max(0, delay_days - 4), delay_days, min(60, delay_days + 4)})
+    exposures = sorted({
+        round(max(0.0, exposure_lakh_per_day * 0.75), 2),
+        round(exposure_lakh_per_day, 2),
+        round(min(100.0, exposure_lakh_per_day * 1.25), 2),
+    })
+    counts = {action["id"]: 0 for action in INTERVENTIONS}
+    trials = 0
+    for test_delay in delays:
+        for test_exposure in exposures:
+            selected = _selected_action_id(
+                disrupted_activity_id,
+                test_delay,
+                test_exposure,
+            )
+            counts[selected] += 1
+            trials += 1
+
+    ranked = sorted(counts.items(), key=lambda item: item[1], reverse=True)
+    dominant_id, dominant_count = ranked[0]
+    titles = {action["id"]: action["title"] for action in INTERVENTIONS}
+    return {
+        "method": "3x3 deterministic stress grid",
+        "tested_scenarios": trials,
+        "delay_range_days": [min(delays), max(delays)],
+        "exposure_range_lakh_per_day": [min(exposures), max(exposures)],
+        "action_frequency": [
+            {
+                "id": action_id,
+                "title": titles[action_id],
+                "selected_trials": counts[action_id],
+                "share_pct": round(100 * counts[action_id] / trials, 1),
+            }
+            for action_id, _ in ranked
+            if counts[action_id] > 0
+        ],
+        "most_common_action_id": dominant_id,
+        "most_common_action_title": titles[dominant_id],
+        "stability_pct": round(100 * dominant_count / trials, 1),
+        "stable": dominant_count == trials,
+        "interpretation": (
+            "Same response in every tested scenario; stable only within this small stress grid."
+            if dominant_count == trials
+            else "Response changes under tested assumptions; treat the ranking as fragile and request human review."
+        ),
+    }
+
+
 def simulate_project(
     disrupted_activity_id: str = "ST-01",
     delay_days: int = 14,
@@ -204,6 +293,7 @@ def simulate_project(
         "impacted_activity_ids": [disrupted_activity_id] + affected_descendants,
         "activities": activities,
         "key_insight": key_insight,
+        "sensitivity": _sensitivity_summary(disrupted_activity_id, delay_days, exposure_lakh_per_day),
         "assumptions": [
             "All task names, durations, dependencies, recovery estimates and cost values are synthetic demo inputs.",
             "The schedule engine is deterministic and uses longest-path dependency propagation; it is not a trained delay-prediction model.",
