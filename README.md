@@ -24,6 +24,7 @@ These are deterministic examples built from made-up durations, dependencies, act
 - Baseline versus disruption comparison, downstream impact trace and critical-chain display.
 - Comparison of five hypothetical intervention options plus no action.
 - Ranking by days recovered, action cost and modelled net value.
+- A 3×3 deterministic assumption stress grid showing whether the preferred action remains stable when delay and daily-exposure assumptions change.
 - Pydantic input validation and tests for critical-path impact, schedule float, ranking and invalid inputs.
 - Existing /risk endpoint retained for the original snapshot risk-score prototype.
 
@@ -97,6 +98,7 @@ Example request to POST /api/scenario:
 - The decision engine is a **deterministic critical-path simulation**, not a trained delay-prediction model and not a causal model.
 - The synthetic network has eight activities and simplified finish-to-start dependencies. It does not model working calendars, lag types, resource levelling, weather calendars, cash-flow, contract terms, uncertainty distributions or change orders.
 - Intervention durations and costs are fixed illustrative assumptions. A real use case would require feasible alternatives approved by delivery teams and current cost inputs.
+- The recommendation stability panel varies the injected delay by ±4 days and the daily-exposure assumption by ±25% in a small deterministic grid. It is a sensitivity check, not a probability estimate, confidence interval, Monte Carlo run or proof of robustness beyond the tested range.
 - The existing /risk endpoint retains a separate Isolation Forest that is fitted to a generated synthetic reference distribution. That anomaly score is **not** a calibrated probability and should not be represented as validated against real project outcomes.
 - No Prestige internal data or live Autodesk / Primavera / ERP / RERA connection is used. All project tasks and values are generic synthetic examples.
 - A credible pilot would need permissioned schedule histories, stable task IDs, source timestamps, project calendars, actual planned/actual outcomes, back-testing, drift/error monitoring, access controls and human sign-off.
