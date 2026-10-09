@@ -31,7 +31,14 @@ Say clearly: “These numbers are synthetic. The value is not the ₹19 lakh its
 
 Say: “This is the counterexample. A late task is not automatically a project-level delay. Spending ₹12 lakh to expedite a task that does not move the finish date is not justified by this model.”
 
-### 4. Close with a realistic pilot (30 seconds)
+### 4. Show recommendation stability (30 seconds)
+
+- Point to the new “Recommendation stability · stress test” panel.
+- In the critical-path case, the same recovery action should remain the choice across the nearby tested assumptions. Explain that this is stability within a small test grid, not a probability guarantee.
+- Click “Test schedule float”. Show that the no-action recommendation can change when the assumed procurement delay is extended and daily exposure rises. Explain that the model marks this decision as sensitive and should not hide the uncertainty.
+- State that the stress grid varies the delay by ±4 days and the daily-exposure assumption by ±25%; it is deterministic and not Monte Carlo.
+
+### 5. Close with a realistic pilot (30 seconds)
 
 “I would not connect this to live systems without permission. The next step is to validate the dependency model with project controls using one approved historical schedule, compare the simulated finish against actual outcomes, and have the team review the recovery actions and cost assumptions. If it does not outperform the current planning baseline on agreed metrics, we should not deploy it.”
 
@@ -75,6 +82,7 @@ Say: “This is the counterexample. A late task is not automatically a project-l
 
 ## Honest limitations you should volunteer
 
+- The recommendation stress test is a small deterministic grid; it does not produce a statistical confidence interval or probability.
 - The dependency network is a small synthetic DAG, not a Prestige schedule.
 - It uses simplified finish-to-start logic; no work calendars, resources, contract conditions, lags, weather, uncertainty distributions or change orders.
 - Recovery days and action costs are assumed.
@@ -107,5 +115,6 @@ Discuss compensation after the role scope, employment type, expected contributio
 - Explain the forward-pass/critical-path method on paper.
 - Be ready to calculate 6 × ₹4.5L − ₹8L = ₹19L aloud.
 - Practice the Autodesk/Primavera objection until you can state the differentiation without claiming novelty the market does not support.
+- Show how the recommendation stability panel distinguishes a stable choice from a decision that changes under nearby assumptions.
 - Check that the GitHub branch / pull request is available and that the app runs on the laptop you will use.
 - Do not describe synthetic project names or costs as Prestige facts.
