@@ -54,11 +54,15 @@ Say: “This is the counterexample. A late task is not automatically a project-l
 
 ### “How does the calculation work?”
 
-“For every task, the forward pass computes its start as the latest finish of its predecessors, and its finish as start plus duration. The project finish is the finish of the final handover task, which is controlled by the longest dependency path. I inject delay into one task, recompute the network, then apply each action's assumed duration reduction one at a time. I calculate days recovered relative to the no-action scenario, cap the credit at the delay introduced, then subtract the action cost from recovered days multiplied by the editable daily exposure assumption.”
+“The engine validates the activity graph and topologically sorts it, so the input rows do not have to already be ordered. In the forward pass, an activity starts at the latest finish of its predecessors. In the backward pass, latest dates are traced back from the modeled project finish. Total float is late start minus early start. Zero-float activities and the dependency edges that drive them define critical paths. If two paths tie, the API preserves both rather than choosing a single predecessor. I inject delay into one task, recompute the network, then apply each action's assumed duration reduction one at a time. I calculate days recovered relative to the no-action scenario, cap the credit at the delay introduced, then subtract the action cost from recovered days multiplied by the editable daily exposure assumption.”
 
 ### “Where did ₹4.5 lakh per day come from?”
 
 “It is a user-editable placeholder, not company data or a benchmark. A real pilot would need finance and project-controls teams to define what a delay day means for that project—overheads, financing or carrying cost, contractual exposure and other agreed components—without double-counting. If that input is unreliable, the value ranking is unreliable.”
+
+### “What happens if two paths are equally critical?”
+
+“The earlier version displayed one path and could silently choose one predecessor when two paths finished at the same time. I changed the engine to calculate total float with a backward pass and preserve tied critical paths. For example, a 15-day procurement delay exhausts the procurement path's modeled float and can make the procurement/MEP path tie with the structural/facade path. The demo now exposes both paths and each task's baseline and scenario float. It still assumes finish-to-start links and no work calendars or resource constraints.”
 
 ### “What if the data is wrong or incomplete?”
 

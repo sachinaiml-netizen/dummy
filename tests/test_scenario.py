@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 
-from app.decision_engine import simulate_project
+from app.decision_engine import analyze_schedule, simulate_project
 from app.main import app
 
 client = TestClient(app)
@@ -103,3 +103,157 @@ def test_vercel_config_includes_runtime_dashboard_asset():
     config = json.loads(Path("vercel.json").read_text(encoding="utf-8"))
     assert config["framework"] == "fastapi"
     assert config["functions"]["app/main.py"]["includeFiles"] == "static/**"
+
+
+
+def test_baseline_schedule_reports_float_for_near_critical_activities():
+    result = simulate_project("PR-01", 14, 4.5)
+    activities = {item["id"]: item for item in result["activities"]}
+    assert activities["ST-01"]["baseline_total_float_days"] == 0
+    assert activities["FC-01"]["baseline_total_float_days"] == 0
+    assert activities["ME-01"]["baseline_total_float_days"] == 6
+    assert activities["PR-01"]["baseline_total_float_days"] == 15
+    assert result["baseline_critical_path_count"] == 1
+
+
+def test_analyzer_accepts_unsorted_tasks_and_preserves_tied_critical_paths():
+    tasks = [
+        {"id": "finish", "duration": 1, "predecessors": ["left", "right"]},
+        {"id": "right", "duration": 4, "predecessors": []},
+        {"id": "short", "duration": 1, "predecessors": []},
+        {"id": "left", "duration": 4, "predecessors": []},
+    ]
+    result = analyze_schedule(tasks)
+    assert result["project_finish"] == 5
+    assert result["critical_path_count"] == 2
+    assert result["critical_paths"] == [["right", "finish"], ["left", "finish"]]
+    assert result["total_float"]["short"] == 4
+    assert result["topological_order"].index("finish") > result["topological_order"].index("left")
+    assert result["topological_order"].index("finish") > result["topological_order"].index("right")
+
+
+def test_analyzer_reports_multiple_terminal_activities_against_shared_project_finish():
+    tasks = [
+        {"id": "critical", "duration": 8, "predecessors": []},
+        {"id": "short", "duration": 3, "predecessors": []},
+    ]
+    result = analyze_schedule(tasks)
+    assert result["project_finish"] == 8
+    assert result["critical_paths"] == [["critical"]]
+    assert result["total_float"]["critical"] == 0
+    assert result["total_float"]["short"] == 5
+
+
+def test_analyzer_rejects_unknown_predecessor():
+    tasks = [{"id": "A", "duration": 2, "predecessors": ["MISSING"]}]
+    try:
+        analyze_schedule(tasks)
+    except ValueError as exc:
+        assert "Unknown predecessor" in str(exc)
+    else:
+        raise AssertionError("Unknown predecessor should be rejected")
+
+
+def test_analyzer_rejects_dependency_cycles():
+    tasks = [
+        {"id": "A", "duration": 2, "predecessors": ["B"]},
+        {"id": "B", "duration": 3, "predecessors": ["A"]},
+    ]
+    try:
+        analyze_schedule(tasks)
+    except ValueError as exc:
+        assert "Dependency cycle detected" in str(exc)
+    else:
+        raise AssertionError("A cyclic dependency graph should be rejected")
+
+
+def test_analyzer_rejects_duplicate_ids_and_non_positive_duration():
+    try:
+        analyze_schedule([
+            {"id": "A", "duration": 1, "predecessors": []},
+            {"id": "A", "duration": 2, "predecessors": []},
+        ])
+    except ValueError as exc:
+        assert "Duplicate task id" in str(exc)
+    else:
+        raise AssertionError("Duplicate task IDs should be rejected")
+
+    try:
+        analyze_schedule([{"id": "A", "duration": 0, "predecessors": []}])
+    except ValueError as exc:
+        assert "positive finite number" in str(exc)
+    else:
+        raise AssertionError("Zero duration should be rejected")
+
+
+def test_analyzer_bounds_materialized_critical_paths_but_reports_exact_count():
+    tasks = [
+        {"id": "merge2", "duration": 1, "predecessors": ["left2", "right2"]},
+        {"id": "left2", "duration": 1, "predecessors": ["left1", "right1"]},
+        {"id": "right2", "duration": 1, "predecessors": ["left1", "right1"]},
+        {"id": "left1", "duration": 1, "predecessors": ["start"]},
+        {"id": "right1", "duration": 1, "predecessors": ["start"]},
+        {"id": "start", "duration": 1, "predecessors": []},
+    ]
+    result = analyze_schedule(tasks, max_paths_to_return=1)
+    assert result["critical_path_count"] == 4
+    assert len(result["critical_paths"]) == 1
+    assert result["critical_paths_truncated"] is True
+
+
+
+def test_procurement_delay_exhausting_float_exposes_tied_critical_paths():
+    result = simulate_project("PR-01", 15, 4.5)
+    assert result["baseline_finish_day"] == 119
+    assert result["shocked_finish_day"] == 119
+    assert result["shocked_slip_days"] == 0
+    assert result["shocked_critical_path_count"] == 2
+    path_set = {tuple(path) for path in result["shocked_critical_paths"]}
+    assert ("AP-01", "DS-01", "ST-01", "FC-01", "IN-01", "HO-01") in path_set
+    assert ("AP-01", "DS-01", "PR-01", "ME-01", "IN-01", "HO-01") in path_set
+    activities = {item["id"]: item for item in result["activities"]}
+    assert activities["PR-01"]["shocked_total_float_days"] == 0
+    assert activities["ME-01"]["shocked_total_float_days"] == 0
+
+
+def test_api_returns_total_float_and_critical_path_count():
+    response = client.get("/api/scenario")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["baseline_critical_path_count"] == 1
+    procurement = next(item for item in data["activities"] if item["id"] == "PR-01")
+    assert procurement["baseline_total_float_days"] == 15
+    assert procurement["shocked_total_float_days"] == 29  # structural delay moves the modeled project finish
+
+
+
+def test_analyzer_handles_a_long_valid_chain_without_recursion_failure():
+    tasks = [
+        {
+            "id": f"T{index}",
+            "duration": 1,
+            "predecessors": [f"T{index - 1}"] if index else [],
+        }
+        for index in range(1200)
+    ]
+    result = analyze_schedule(tasks)
+    assert result["project_finish"] == 1200
+    assert result["critical_path_count"] == 1
+    assert len(result["critical_paths"][0]) == 1200
+    assert result["total_float"]["T600"] == 0
+
+
+def test_analyzer_rejects_surrounding_whitespace_in_ids_and_invalid_override_shape():
+    try:
+        analyze_schedule([{"id": " A ", "duration": 1, "predecessors": []}])
+    except ValueError as exc:
+        assert "surrounding whitespace" in str(exc)
+    else:
+        raise AssertionError("Padded task IDs should be rejected")
+
+    try:
+        analyze_schedule([{"id": "A", "duration": 1, "predecessors": []}], duration_overrides=[])
+    except ValueError as exc:
+        assert "duration_overrides must be a dictionary" in str(exc)
+    else:
+        raise AssertionError("An invalid duration override container should be rejected")

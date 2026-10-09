@@ -34,48 +34,235 @@ EXAMPLE_EXPOSURE_LAKH_PER_DAY = 4.5
 FINAL_TASK_ID = "HO-01"
 
 
+def analyze_schedule(
+    tasks: list[dict[str, Any]],
+    duration_overrides: dict[str, int | float] | None = None,
+    *,
+    max_paths_to_return: int = 256,
+) -> dict[str, Any]:
+    """Run CPM forward/backward passes on a finish-to-start dependency network.
+
+    Tasks may be supplied in any order. This analyzer validates identifiers,
+    durations and links, topologically sorts the graph, calculates early/late
+    dates and total float, and preserves tied critical paths. It does not model
+    working calendars, lags, constraints or resource levelling.
+    """
+    import heapq
+    import math
+
+    if not isinstance(tasks, list) or not tasks:
+        raise ValueError("tasks must be a non-empty list")
+    if isinstance(max_paths_to_return, bool) or not isinstance(max_paths_to_return, int) or max_paths_to_return < 1:
+        raise ValueError("max_paths_to_return must be a positive integer")
+
+    original_index: dict[str, int] = {}
+    by_id: dict[str, dict[str, Any]] = {}
+    predecessors: dict[str, list[str]] = {}
+    durations: dict[str, int | float] = {}
+
+    for index, task in enumerate(tasks):
+        if not isinstance(task, dict):
+            raise ValueError(f"Task at index {index} must be an object")
+        task_id = task.get("id")
+        if not isinstance(task_id, str) or not task_id.strip() or task_id != task_id.strip():
+            raise ValueError(f"Task at index {index} must have a non-empty id without surrounding whitespace")
+        if task_id in by_id:
+            raise ValueError(f"Duplicate task id: {task_id}")
+        duration = task.get("duration")
+        if isinstance(duration, bool) or not isinstance(duration, (int, float)):
+            raise ValueError(f"Duration for {task_id} must be a positive finite number")
+        if not math.isfinite(float(duration)) or duration <= 0:
+            raise ValueError(f"Duration for {task_id} must be a positive finite number")
+        pred_list = task.get("predecessors", [])
+        if not isinstance(pred_list, list):
+            raise ValueError(f"Predecessors for {task_id} must be a list")
+        if any(not isinstance(pred, str) or not pred.strip() or pred != pred.strip() for pred in pred_list):
+            raise ValueError(f"Predecessors for {task_id} must be trimmed, non-empty string ids")
+        if len(set(pred_list)) != len(pred_list):
+            raise ValueError(f"Duplicate predecessor in task {task_id}")
+        if task_id in pred_list:
+            raise ValueError(f"Task {task_id} cannot depend on itself")
+        by_id[task_id] = task
+        original_index[task_id] = index
+        predecessors[task_id] = list(pred_list)
+        durations[task_id] = duration
+
+    for task_id, pred_list in predecessors.items():
+        for pred in pred_list:
+            if pred not in by_id:
+                raise ValueError(f"Unknown predecessor {pred!r} referenced by task {task_id}")
+
+    if duration_overrides is not None and not isinstance(duration_overrides, dict):
+        raise ValueError("duration_overrides must be a dictionary")
+    for task_id, duration in (duration_overrides or {}).items():
+        if task_id not in by_id:
+            raise ValueError(f"Duration override references unknown task: {task_id}")
+        if isinstance(duration, bool) or not isinstance(duration, (int, float)):
+            raise ValueError(f"Duration override for {task_id} must be a positive finite number")
+        if not math.isfinite(float(duration)) or duration <= 0:
+            raise ValueError(f"Duration override for {task_id} must be a positive finite number")
+        durations[task_id] = duration
+
+    successors: dict[str, list[str]] = {task_id: [] for task_id in by_id}
+    indegree: dict[str, int] = {}
+    for task_id, pred_list in predecessors.items():
+        indegree[task_id] = len(pred_list)
+        for pred in pred_list:
+            successors[pred].append(task_id)
+    for successor_list in successors.values():
+        successor_list.sort(key=lambda task_id: original_index[task_id])
+
+    ready: list[tuple[int, str]] = [
+        (original_index[task_id], task_id)
+        for task_id, degree in indegree.items()
+        if degree == 0
+    ]
+    heapq.heapify(ready)
+    topo_order: list[str] = []
+    while ready:
+        _, task_id = heapq.heappop(ready)
+        topo_order.append(task_id)
+        for successor in successors[task_id]:
+            indegree[successor] -= 1
+            if indegree[successor] == 0:
+                heapq.heappush(ready, (original_index[successor], successor))
+    if len(topo_order) != len(by_id):
+        cyclic = [task_id for task_id, degree in indegree.items() if degree > 0]
+        raise ValueError(f"Dependency cycle detected involving: {', '.join(cyclic)}")
+
+    early_start: dict[str, int | float] = {}
+    early_finish: dict[str, int | float] = {}
+    for task_id in topo_order:
+        early_start[task_id] = max(
+            (early_finish[pred] for pred in predecessors[task_id]),
+            default=0,
+        )
+        early_finish[task_id] = early_start[task_id] + durations[task_id]
+
+    terminal_ids = [task_id for task_id in topo_order if not successors[task_id]]
+    project_finish = max(early_finish[task_id] for task_id in terminal_ids)
+
+    late_start: dict[str, int | float] = {}
+    late_finish: dict[str, int | float] = {}
+    for task_id in reversed(topo_order):
+        if successors[task_id]:
+            late_finish[task_id] = min(late_start[succ] for succ in successors[task_id])
+        else:
+            late_finish[task_id] = project_finish
+        late_start[task_id] = late_finish[task_id] - durations[task_id]
+
+    epsilon = 1e-9
+    total_float: dict[str, int | float] = {}
+    critical_ids: list[str] = []
+    for task_id in topo_order:
+        raw_float = late_start[task_id] - early_start[task_id]
+        value: int | float = 0 if abs(raw_float) < epsilon else raw_float
+        total_float[task_id] = value
+        if value == 0:
+            critical_ids.append(task_id)
+
+    critical_set = set(critical_ids)
+    critical_successors: dict[str, list[str]] = {task_id: [] for task_id in by_id}
+    critical_predecessors: dict[str, list[str]] = {task_id: [] for task_id in by_id}
+    for task_id in topo_order:
+        if task_id not in critical_set:
+            continue
+        for succ in successors[task_id]:
+            if (
+                succ in critical_set
+                and abs(float(early_finish[task_id]) - float(early_start[succ])) < epsilon
+            ):
+                critical_successors[task_id].append(succ)
+                critical_predecessors[succ].append(task_id)
+
+    critical_sources = [
+        task_id for task_id in topo_order
+        if task_id in critical_set and not critical_predecessors[task_id]
+    ]
+    critical_terminals = {
+        task_id for task_id in terminal_ids
+        if task_id in critical_set
+        and abs(float(early_finish[task_id]) - float(project_finish)) < epsilon
+    }
+
+    # Count paths exactly with dynamic programming, but only materialize a bounded
+    # number for responses so tied networks cannot cause unbounded response growth.
+    path_counts: dict[str, int] = {task_id: 0 for task_id in by_id}
+    for task_id in critical_sources:
+        path_counts[task_id] = 1
+    for task_id in topo_order:
+        for succ in critical_successors[task_id]:
+            path_counts[succ] += path_counts[task_id]
+    critical_path_count = sum(path_counts[task_id] for task_id in critical_terminals)
+
+    critical_paths: list[list[str]] = []
+    truncated = False
+    # Iterative DFS avoids Python recursion limits on long but valid activity chains.
+    stop_enumerating = False
+    for source in critical_sources:
+        if stop_enumerating:
+            break
+        stack: list[tuple[str, list[str]]] = [(source, [source])]
+        while stack:
+            task_id, path = stack.pop()
+            if task_id in critical_terminals:
+                critical_paths.append(path)
+                if len(critical_paths) >= max_paths_to_return:
+                    truncated = critical_path_count > len(critical_paths)
+                    stop_enumerating = True
+                    break
+                continue
+            for succ in reversed(critical_successors[task_id]):
+                stack.append((succ, path + [succ]))
+
+    return {
+        "start": early_start,
+        "finish": early_finish,
+        "duration": durations,
+        "early_start": early_start,
+        "early_finish": early_finish,
+        "late_start": late_start,
+        "late_finish": late_finish,
+        "total_float": total_float,
+        "critical_task_ids": critical_ids,
+        "critical_paths": critical_paths,
+        "critical_path_count": critical_path_count,
+        "critical_paths_truncated": truncated,
+        "terminal_task_ids": terminal_ids,
+        "project_finish": project_finish,
+        "topological_order": topo_order,
+    }
+
+
 def _schedule(
     extra_delay_activity_id: str | None = None,
     delay_days: int = 0,
     intervention: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    tasks = deepcopy(TASKS)
-    duration = {task["id"]: task["duration"] for task in tasks}
+    duration = {task["id"]: task["duration"] for task in TASKS}
 
-    if extra_delay_activity_id and delay_days:
+    if extra_delay_activity_id is not None:
+        if extra_delay_activity_id not in duration:
+            raise ValueError(f"Unknown activity: {extra_delay_activity_id}")
+        if isinstance(delay_days, bool) or not isinstance(delay_days, int) or not 0 <= delay_days <= 60:
+            raise ValueError("delay_days must be an integer between 0 and 60")
         duration[extra_delay_activity_id] += delay_days
 
     if intervention and intervention["target"] and intervention["recovery_days"]:
         target = intervention["target"]
+        if target not in duration:
+            raise ValueError(f"Unknown intervention target: {target}")
         # Recovery cannot make an activity have a zero/negative duration.
         duration[target] = max(1, duration[target] - intervention["recovery_days"])
 
-    start: dict[str, int] = {}
-    finish: dict[str, int] = {}
-    for task in tasks:  # TASKS is stored in topological order.
-        predecessors = task["predecessors"]
-        start[task["id"]] = max((finish[pred] for pred in predecessors), default=0)
-        finish[task["id"]] = start[task["id"]] + duration[task["id"]]
-
-    return {"start": start, "finish": finish, "duration": duration}
+    schedule = analyze_schedule(TASKS, duration)
+    return schedule
 
 
 def _critical_chain(schedule: dict[str, Any]) -> list[str]:
-    by_id = {task["id"]: task for task in TASKS}
-    current = FINAL_TASK_ID
-    reverse_chain = [current]
-    while by_id[current]["predecessors"]:
-        preds = by_id[current]["predecessors"]
-        # A predecessor on the controlling path finishes exactly at current's start.
-        controlling = max(preds, key=lambda pred: (schedule["finish"][pred], -next(
-            i for i, task in enumerate(TASKS) if task["id"] == pred
-        )))
-        if schedule["finish"][controlling] < schedule["start"][current]:
-            break
-        reverse_chain.append(controlling)
-        current = controlling
-    return list(reversed(reverse_chain))
-
+    """Return one deterministic representative path for legacy UI compatibility."""
+    paths = schedule.get("critical_paths", [])
+    return list(paths[0]) if paths else []
 
 def _descendants(activity_id: str) -> list[str]:
     descendants: set[str] = set()
@@ -247,8 +434,14 @@ def simulate_project(
             "finish_shift_days": shocked["finish"][task_id] - baseline["finish"][task_id],
             "recommended_start_day": best_schedule["start"][task_id],
             "recommended_finish_day": best_schedule["finish"][task_id],
-            "on_baseline_critical_chain": task_id in _critical_chain(baseline),
-            "on_shocked_critical_chain": task_id in _critical_chain(shocked),
+            "baseline_total_float_days": baseline["total_float"][task_id],
+            "shocked_total_float_days": shocked["total_float"][task_id],
+            "recommended_total_float_days": best_schedule["total_float"][task_id],
+            "on_baseline_critical_path": task_id in baseline["critical_task_ids"],
+            "on_shocked_critical_path": task_id in shocked["critical_task_ids"],
+            # Legacy field names retained for clients using the original response shape.
+            "on_baseline_critical_chain": task_id in baseline["critical_task_ids"],
+            "on_shocked_critical_chain": task_id in shocked["critical_task_ids"],
             "downstream_of_disruption": task_id in affected_descendants,
         })
 
@@ -290,6 +483,13 @@ def simulate_project(
         "baseline_critical_chain": _critical_chain(baseline),
         "shocked_critical_chain": _critical_chain(shocked),
         "recommended_critical_chain": _critical_chain(best_schedule),
+        "baseline_critical_paths": baseline["critical_paths"],
+        "shocked_critical_paths": shocked["critical_paths"],
+        "recommended_critical_paths": best_schedule["critical_paths"],
+        "baseline_critical_path_count": baseline["critical_path_count"],
+        "shocked_critical_path_count": shocked["critical_path_count"],
+        "recommended_critical_path_count": best_schedule["critical_path_count"],
+        "critical_paths_truncated": any((baseline["critical_paths_truncated"], shocked["critical_paths_truncated"], best_schedule["critical_paths_truncated"])),
         "impacted_activity_ids": [disrupted_activity_id] + affected_descendants,
         "activities": activities,
         "key_insight": key_insight,
