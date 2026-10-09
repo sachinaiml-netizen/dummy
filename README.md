@@ -19,7 +19,7 @@ The current feature is called **Float-Burn Watch**: it demonstrates how an activ
 - **CSV sample template:** https://project-impact-lab.vercel.app/sample-schedule.csv
 - **CSV analysis endpoint:** `POST https://project-impact-lab.vercel.app/api/schedule/analyze-csv`
 
-The public URL and the three GET routes were checked after deployment on 2026-10-09. The default scenario response returns baseline handover Day 119, no-action handover Day 133, and the explicitly illustrative structural recovery option. Automated CI separately tests the POST scenario route and its validation.
+The public dashboard, `/health`, `/api/scenario`, `/api/catalog`, `/sample-schedule.csv`, and `/openapi.json` were checked after deployment on 2026-10-09. The default scenario response returns baseline handover Day 119, no-action handover Day 133, and the explicitly illustrative structural recovery option. The CSV POST route is present in the live OpenAPI document; CSV calculations and malformed-input handling passed automated CI. An external live POST was not executed during this iteration.
 
 **Deployment limitation:** the Vercel deployment is currently a manual source upload. The connected Vercel account did not have a GitHub Login Connection, so Vercel is not linked to this repository and future pushes to main will not automatically deploy. Re-deploy the latest main source or establish the GitHub connection in Vercel before relying on automatic releases. No database, custom domain, secret, or paid add-on was configured; the connected account's full billing/plan status was not readable through the available connection.
 
