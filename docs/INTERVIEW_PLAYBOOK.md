@@ -50,6 +50,15 @@ Say: “This is the counterexample. A late task is not automatically a project-l
 - Click “Procurement +15d · zero float”: show zero float and two critical paths, while handover remains on Day 119.
 - Click “Procurement +16d · handover +1d”: show the finish moves to Day 120.
 
+### Optional: prove the network is configurable (45 seconds)
+
+- Click “Load sample” in the CSV intake panel, then “Validate & load”.
+- Select PR-01 and run the 14-, 15- and 16-day delay cases.
+- Explain that the uploaded task table is parsed, validated and passed to the same CPM engine; it is not a separately invented algorithm.
+- State the scope precisely: generic CSV schema, no native XER/XML parser, no live Prestige data, no calendar or resource constraints.
+
+Only do this if the primary one-click threshold demo has already worked.
+
 ### 4. Show recommendation stability (30 seconds)
 
 - Point to the new “Recommendation stability · stress test” panel.
