@@ -50,7 +50,7 @@ Say: “This is the counterexample. A late task is not automatically a project-l
 
 ### “Where is the AI?”
 
-“In this version, the decision engine is not an AI model; it is deterministic graph and critical-path logic. That is deliberate because I have no authorized, labelled Prestige project history to train or validate a model. The older risk endpoint uses an Isolation Forest fitted to synthetic reference data, so I do not present its anomaly score as a validated probability. With permissioned historical data, I would first build a basic schedule-variance baseline, use time-aware validation, then test whether ML improves decision quality over that baseline.”
+“In this version, the decision engine is not an AI model; it is deterministic graph and critical-path logic. That is deliberate because I have no authorized, labelled Prestige project history to train or validate a model. The separate /risk endpoint uses a bounded, deterministic rule-based deviation indicator, not an ML anomaly detector or a probability. I removed the synthetic Isolation Forest because a model fitted to generated 'normal' data gives no evidence of real-world validity and adds substantial deployment dependencies. With permissioned historical data, I would first test whether a calibrated ML approach improves on this transparent baseline. With permissioned historical data, I would first build a basic schedule-variance baseline, use time-aware validation, then test whether ML improves decision quality over that baseline.”
 
 ### “How does the calculation work?”
 
@@ -87,6 +87,7 @@ Say: “This is the counterexample. A late task is not automatically a project-l
 - It uses simplified finish-to-start logic; no work calendars, resources, contract conditions, lags, weather, uncertainty distributions or change orders.
 - Recovery days and action costs are assumed.
 - There is no live integration with Autodesk, Primavera, ERP or RERA.
+- The legacy snapshot-risk route is a weighted heuristic; its field named `anomaly_score` is a compatibility label for a bounded rule-based indicator.
 - The app is not a trained, validated delay-prediction model.
 - The value estimate is sensitive to the daily-exposure assumption.
 
