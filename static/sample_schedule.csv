@@ -1,0 +1,9 @@
+task_id,task_name,duration_days,predecessors,owner,stream
+AP-01,Approval package,18,,Project controls,Approvals
+DS-01,Design freeze,12,AP-01,Design coordination,Design
+ST-01,Structure works,35,DS-01,Civil contractor,Construction
+PR-01,Long-lead procurement,26,DS-01,Procurement,Supply chain
+ME-01,MEP rough-in,18,ST-01|PR-01,MEP contractor,MEP
+FC-01,Facade closure,24,ST-01,Facade contractor,Envelope
+IN-01,Interior finishes,20,ME-01|FC-01,Finishes contractor,Finishes
+HO-01,Commissioning and handover,10,IN-01,Project delivery,Handover
