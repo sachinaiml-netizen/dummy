@@ -14,6 +14,8 @@ The primary Project Impact Lab engine is deterministic Critical Path Method (CPM
 6. Total float is late start minus early start. For this simplified CPM model, zero-float tasks are critical. Edges are critical only where the predecessor's early finish meets the successor's early start and both tasks have zero float.
 7. Preserve all tied critical paths. The exact path count uses dynamic programming; at most 256 actual paths are included in an API response to avoid unbounded response size.
 
+The product's currently emphasised workflow is **Float-Burn Watch**: show how a reported delay consumes an activity's original total float and whether the activity becomes co-critical or pushes the modeled project finish. This is a plain-language layer over CPM, not a new scheduling method. The workflow's novelty/value for any specific company is unverified. See [Problem Statement](PROBLEM_STATEMENT.md) and [Competitive Research](COMPETITIVE_RESEARCH.md).
+
 This core logic follows the basic forward/backward-pass and total-float concepts documented in Oracle Primavera Cloud's [Scheduling Overview](https://primavera.oraclecloud.com/help/en/user/88251.htm). Oracle separately documents loop checks and notes that calendars, relationship lags and resource levelling affect real project schedules: [Schedule a Project](https://primavera.oraclecloud.com/help/en/user/88257.htm). Project Impact Lab does not implement those features.
 
 ## 2. Legacy snapshot-risk endpoint
