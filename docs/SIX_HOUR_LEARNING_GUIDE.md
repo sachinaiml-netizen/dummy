@@ -86,10 +86,11 @@ Ask yourself:
 ## Three-minute demo sequence
 
 1. Open the live preview: https://project-impact-lab.vercel.app/
-2. Use **Test schedule float** with long-lead procurement and a 14-day delay. Point out that handover stays at Day 119, but float falls from 15 days to 1 day.
-3. Explain the threshold: at 15 days of delay, procurement becomes co-critical; at 16 days, this model moves handover to Day 120.
-4. Click **Recalculate impact** after changing the delay. Point out that the dashboard reports a modeled output, not a prediction about Prestige.
-5. Switch to **Critical-path case** to compare an assumed recovery action. State that the ₹19 lakh figure is an illustrative calculation, not a saving claim.
+2. Use **Procurement +14d · 1d left**. Handover stays at Day 119, but float falls from 15 days to 1 day.
+3. Click **Procurement +15d · zero float**: procurement becomes co-critical with structure/facade, while handover still remains Day 119.
+4. Click **Procurement +16d · handover +1d**: modeled handover moves to Day 120.
+5. Click **Recalculate impact** after changing a value. Point out that the dashboard reports modeled output, not a prediction about Prestige.
+6. Switch to **Structure +14d · recovery case** to compare an assumed recovery action. State that the ₹19 lakh figure is an illustrative calculation, not a saving claim.
 
 ## Questions you should be able to answer
 

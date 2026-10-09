@@ -302,3 +302,17 @@ def test_default_scenario_exposes_explicit_float_fields_without_changing_recomme
     structure = next(item for item in result["activities"] if item["id"] == "ST-01")
     assert structure["total_float_change_days"] == 0
     assert result["recommended_action"]["id"] == "structural_recovery"
+
+
+def test_dashboard_exposes_one_click_float_threshold_scenarios():
+    response = client.get("/")
+    assert response.status_code == 200
+    page = response.text
+    assert 'id="float14Case"' in page
+    assert 'id="float15Case"' in page
+    assert 'id="float16Case"' in page
+    assert "Procurement +14d" in page
+    assert "Procurement +15d" in page
+    assert "Procurement +16d" in page
+    assert "15 days of float" in page
+    assert "moves modeled handover by 1 day" in page
