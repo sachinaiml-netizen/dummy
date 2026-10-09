@@ -1,19 +1,17 @@
 # Architecture Notes
 
-The prototype is intentionally split into two signals.
+## 1. Primary decision engine
 
-## 1. Interpretable risk score
+The primary Project Impact Lab engine is deterministic schedule logic. It calculates a baseline dependency network, injects a scenario delay, recomputes the finish date, and evaluates explicitly parameterized recovery actions. It is not an ML forecast.
 
-Schedule, cost, vendor, issue and quality indicators contribute known weights to an initial risk score.
+## 2. Legacy snapshot-risk endpoint
 
-This makes the system easy to reason about with business stakeholders.
+The separate `POST /risk` endpoint returns a weighted score from schedule gap, budget variance, vendor delay, unresolved issues and quality defects. A bounded rule-based deviation index is retained under the legacy response key `anomaly_score` for compatibility.
 
-## 2. Anomaly detection
+The deviation index normalizes each signal against an illustrative reference range, caps each value at 1, and combines them using fixed weights totalling 1. It is not an Isolation Forest, trained anomaly detector, confidence score, or probability. The weights and ranges have not been calibrated against real construction outcomes.
 
-An Isolation Forest is fit on synthetic normal-project telemetry and provides a second signal for unusual combinations of project metrics.
+This rule-based design is intentional: fitting an Isolation Forest to synthetic samples creates no evidence of real-world anomaly detection and adds substantial runtime dependencies without strengthening the project's primary schedule-decision demonstration.
 
-The anomaly signal is only used as a bounded adjustment; it is not presented as a ground-truth probability.
+## 3. Production evolution
 
-## Production evolution
-
-A production deployment would use time-series project history rather than a one-row snapshot, validate the model against historical project outcomes, version features and thresholds, and add monitoring for drift and false-positive/false-negative rates.
+A real pilot should use approved historic project snapshots and schedules. Calibrate any scoring thresholds with domain experts, evaluate against held-out time periods, compare against a simple baseline, and report false-positive/false-negative behaviour before presenting any model as validated. Preserve feature provenance, thresholds, model/version metadata and human review records.
