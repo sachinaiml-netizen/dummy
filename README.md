@@ -32,12 +32,12 @@ These are deterministic examples built from made-up durations, dependencies, act
 
 - Interactive browser dashboard served by FastAPI.
 - Editable disruption activity, delay length and daily-exposure assumption.
-- Dependency graph with forward-pass schedule calculation.
+- Validated finish-to-start dependency graph with deterministic topological sorting, a CPM forward pass, backward pass, total float and tie-aware critical paths.
 - Baseline versus disruption comparison, downstream impact trace and critical-chain display.
 - Comparison of five hypothetical intervention options plus no action.
 - Ranking by days recovered, action cost and modelled net value.
 - A 3×3 deterministic assumption stress grid showing whether the preferred action remains stable when delay and daily-exposure assumptions change.
-- Pydantic input validation and tests for critical-path impact, schedule float, ranking and invalid inputs.
+- Pydantic input validation and tests for critical-path impact, schedule float, tied paths, non-topological input order, cycles, unknown predecessors, invalid durations and bounded critical-path output.
 - Legacy /risk endpoint retained with a transparent rule-based snapshot score and bounded deviation indicator; it does not claim to run an ML anomaly detector.
 
 ## Architecture
@@ -108,6 +108,12 @@ Install test-only dependencies separately; production installs remain lean:
     pip install -r requirements-dev.txt
     python -m pytest -q
 
+## Scheduling algorithm
+
+For this proof of concept, relationships are simplified finish-to-start links and activity durations are positive numbers. The engine first validates unique task IDs, predecessor references, and durations; it then topologically sorts the graph and computes earliest start/finish using a forward pass. It computes latest finish/start in reverse order using a backward pass. Total float is `late start - early start`; tasks with zero float are treated as critical for this simple network. Ties are preserved as multiple critical paths rather than silently choosing one predecessor. Path counts are computed exactly, while the response materializes at most 256 paths to bound output size.
+
+This matches the core CPM concepts documented by Oracle Primavera Cloud, which describes forward and backward passes, total float, critical paths and loop checking. It is not intended to reproduce Primavera's calendar, lag, constraint or resource-leveling behaviour.
+
 ## Model card and limits
 
 - The decision engine is a **deterministic critical-path simulation**, not a trained delay-prediction model and not a causal model.
@@ -130,6 +136,9 @@ Any relevance to Prestige's actual processes remains a hypothesis to validate wi
 - Autodesk Research, Intelligent Construction: https://www.research.autodesk.com/projects/intelligent-construction/
 - Autodesk Construction IQ documentation: https://help.autodesk.com/cloudhelp/ENU/Docs-Insight/files/Insight_Construction_IQ.html
 - Oracle Primavera Cloud overview: https://www.oracle.com/in/construction-engineering/primavera-cloud-project-management/
+- Oracle Primavera Cloud scheduling overview (CPM, backward/forward pass, total float and multiple paths): https://primavera.oraclecloud.com/help/en/user/88251.htm
+- Oracle Primavera Cloud schedule project (loop checks and scheduling options): https://primavera.oraclecloud.com/help/en/user/88257.htm
+- U.S. Government Accountability Office, Schedule Assessment Guide (GAO-16-89G): https://www.gao.gov/assets/gao-16-89g.pdf
 - Prestige Group press-release index: https://www.prestigeconstructions.com/kn/news/2026/april
 
 Prepared as a student proof of concept for a technology discussion. No affiliation with, endorsement by, or internal access to Prestige Group is implied.
