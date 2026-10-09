@@ -1,33 +1,16 @@
 from __future__ import annotations
 
-import numpy as np
-from sklearn.ensemble import IsolationForest
-
 from .schemas import ProjectTelemetry
 
 
-def _features(p: ProjectTelemetry) -> np.ndarray:
-    schedule_gap = max(0.0, p.planned_progress - p.actual_progress)
-    return np.array(
-        [[
-            schedule_gap,
-            max(0.0, p.budget_variance_pct),
-            float(p.vendor_delay_days),
-            float(p.open_issues),
-            float(p.quality_defects),
-        ]],
-        dtype=float,
-    )
-
-
-def _risk_score(p: ProjectTelemetry) -> float:
-    schedule_gap = max(0.0, p.planned_progress - p.actual_progress)
-
+def _risk_score(project: ProjectTelemetry) -> float:
+    """Transparent weighted snapshot score; weights are illustrative, not calibrated."""
+    schedule_gap = max(0.0, project.planned_progress - project.actual_progress)
     schedule_component = min(35.0, schedule_gap * 1.8)
-    cost_component = min(25.0, max(0.0, p.budget_variance_pct) * 1.25)
-    vendor_component = min(15.0, p.vendor_delay_days * 1.5)
-    issue_component = min(15.0, p.open_issues * 0.75)
-    quality_component = min(10.0, p.quality_defects * 0.8)
+    cost_component = min(25.0, max(0.0, project.budget_variance_pct) * 1.25)
+    vendor_component = min(15.0, project.vendor_delay_days * 1.5)
+    issue_component = min(15.0, project.open_issues * 0.75)
+    quality_component = min(10.0, project.quality_defects * 0.8)
 
     return round(
         min(
@@ -42,34 +25,28 @@ def _risk_score(p: ProjectTelemetry) -> float:
     )
 
 
-def _fit_reference_model() -> IsolationForest:
-    rng = np.random.default_rng(42)
-    # Synthetic "normal" project telemetry.
-    normal = np.column_stack(
-        [
-            rng.normal(3, 2, 120).clip(0),
-            rng.normal(2, 2, 120).clip(0),
-            rng.normal(2, 2, 120).clip(0),
-            rng.normal(4, 2, 120).clip(0),
-            rng.normal(2, 1.5, 120).clip(0),
-        ]
+def _deviation_indicator(project: ProjectTelemetry) -> float:
+    """Bounded rule-based deviation index, retained under the legacy API field name.
+
+    This is not an Isolation Forest, trained anomaly detector, or probability.
+    Each signal is normalized against a documented illustrative reference range,
+    capped at 1, and combined with fixed weights that sum to 1.
+    """
+    schedule_gap = max(0.0, project.planned_progress - project.actual_progress)
+    components = (
+        (min(schedule_gap / 20.0, 1.0), 0.25),
+        (min(max(project.budget_variance_pct, 0.0) / 15.0, 1.0), 0.20),
+        (min(project.vendor_delay_days / 14.0, 1.0), 0.20),
+        (min(project.open_issues / 20.0, 1.0), 0.20),
+        (min(project.quality_defects / 10.0, 1.0), 0.15),
     )
-    model = IsolationForest(n_estimators=150, contamination=0.08, random_state=42)
-    model.fit(normal)
-    return model
-
-
-_MODEL = _fit_reference_model()
+    return round(sum(signal * weight for signal, weight in components), 3)
 
 
 def assess_risk(project: ProjectTelemetry) -> dict:
-    features = _features(project)
-    # decision_function is higher for more normal observations.
-    raw = float(_MODEL.decision_function(features)[0])
-    anomaly_score = round(float(np.clip(0.5 - raw, 0.0, 1.0)), 3)
-
+    deviation_score = _deviation_indicator(project)
     score = _risk_score(project)
-    if anomaly_score > 0.65:
+    if deviation_score > 0.65:
         score = min(100.0, score + 8.0)
 
     if score >= 70:
@@ -105,7 +82,8 @@ def assess_risk(project: ProjectTelemetry) -> dict:
     return {
         "risk_score": score,
         "risk_band": band,
-        "anomaly_score": anomaly_score,
+        # Kept for response compatibility; the value is heuristic, not a probability.
+        "anomaly_score": deviation_score,
         "leading_indicators": indicators,
         "recommended_action": action,
     }
