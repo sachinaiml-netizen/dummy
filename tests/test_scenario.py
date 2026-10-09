@@ -70,7 +70,7 @@ def test_api_rejects_unknown_activity():
 
 
 
-def test_critical_path_case_exposes_assumption_sensitivity():
+def test_critical_path_case_shows_stability_for_nearby_assumptions():
     result = simulate_project("ST-01", 14, 4.5)
     sensitivity = result["sensitivity"]
     assert sensitivity["tested_scenarios"] == 9
