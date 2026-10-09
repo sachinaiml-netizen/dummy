@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Project Impact Lab | Decision rehearsal</title>
+<style>
+:root{--bg:#0a1018;--panel:#111b27;--panel2:#152232;--line:#263648;--ink:#edf4fb;--muted:#8fa1b5;--lime:#c9f36a;--lime2:#91bd42;--orange:#ffb86b;--red:#ff7979;--blue:#72c6ff;--shadow:0 18px 45px rgba(0,0,0,.18)}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(1000px 500px at 85% -15%,#173049 0%,transparent 58%),var(--bg);color:var(--ink);font:14px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+.wrap{max-width:1440px;margin:0 auto;padding:26px 28px 38px}.top{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:26px}.brand{display:flex;gap:13px;align-items:center}.mark{width:42px;height:42px;border:1px solid #567333;background:linear-gradient(135deg,#243920,#13251f);border-radius:13px;display:grid;place-items:center;color:var(--lime);font-size:20px;font-weight:900}.eyebrow{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--lime);font-weight:800}.brand h1{margin:2px 0 0;font-size:24px;letter-spacing:-.04em}.topright{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.pill{padding:7px 11px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:11px;display:inline-flex;align-items:center;gap:7px}.dot{width:7px;height:7px;background:var(--lime);border-radius:50%;display:inline-block}.hero{display:grid;grid-template-columns:1.3fr .7fr;gap:20px;margin-bottom:18px}.hero-copy,.thesis{background:linear-gradient(135deg,#152335,#101923);border:1px solid var(--line);border-radius:18px;padding:23px 25px;box-shadow:var(--shadow)}.hero-copy h2{margin:0 0 10px;max-width:740px;font-size:clamp(25px,3vw,38px);line-height:1.08;letter-spacing:-.045em}.hero-copy h2 span{color:var(--lime)}.hero-copy p{max-width:770px;margin:0;color:#aebccd;font-size:13px}.tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:17px}.tag{font-size:10px;color:#bdc9d8;border:1px solid #2c3d50;background:#101b27;border-radius:6px;padding:5px 8px}.thesis{display:flex;flex-direction:column;justify-content:space-between}.thesis .big{font-size:11px;text-transform:uppercase;letter-spacing:.15em;color:var(--muted);font-weight:800}.thesis h3{font-size:20px;line-height:1.22;margin:10px 0;color:var(--lime);letter-spacing:-.03em}.thesis p{color:#a8b6c6;margin:0;font-size:12px}.thesis .note{margin-top:17px;padding-top:13px;border-top:1px solid var(--line);font-size:10px;color:#8598ad}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:0 0 18px}.kpi{padding:16px 18px;border:1px solid var(--line);background:linear-gradient(150deg,#121d29,#0e1721);border-radius:13px;min-height:105px}.kpi .label{font-size:10px;letter-spacing:.11em;color:var(--muted);text-transform:uppercase;font-weight:800}.kpi .value{font-size:28px;letter-spacing:-.05em;font-weight:750;margin-top:7px}.kpi .sub{font-size:10px;color:var(--muted);margin-top:2px}.accent{color:var(--lime)}.warn{color:var(--orange)}.bad{color:var(--red)}
+.layout{display:grid;grid-template-columns:320px minmax(0,1fr);gap:16px;align-items:start}.panel{border:1px solid var(--line);border-radius:15px;background:linear-gradient(160deg,#121e2b,#101821);overflow:hidden;box-shadow:var(--shadow)}.panelhead{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px}.panelhead h3{font-size:13px;margin:0;letter-spacing:-.01em}.index{color:var(--lime);font-size:10px;font-weight:900;letter-spacing:.14em}.panelbody{padding:18px}.control{margin-bottom:21px}.control label{display:flex;justify-content:space-between;gap:8px;font-size:11px;font-weight:750;margin-bottom:9px}.hint{font-size:10px;font-weight:400;color:var(--muted)}select,input[type=number]{width:100%;background:#0b131c;color:var(--ink);border:1px solid #2a3a4d;border-radius:9px;padding:11px 10px;font:inherit;font-size:12px;outline:none}select:focus,input:focus{border-color:var(--lime)}input[type=range]{width:100%;accent-color:var(--lime);cursor:pointer}.range-meta{display:flex;justify-content:space-between;color:#71859b;font-size:10px;margin-top:4px}.range-current{color:var(--lime);font-size:13px;font-weight:850}.btn{border:0;border-radius:9px;padding:11px 13px;font:inherit;font-size:11px;font-weight:800;cursor:pointer;transition:transform .15s,opacity .15s}.btn:active{transform:translateY(1px)}.btn-primary{background:var(--lime);color:#172112;width:100%}.btn-secondary{background:#1d2d3e;color:#d2ddeb;border:1px solid #304358}.btn:disabled{opacity:.5;cursor:wait}.quick{display:flex;gap:8px;margin-top:9px}.quick .btn{flex:1;padding:8px 6px;font-size:10px}.assumption{border-top:1px solid var(--line);padding-top:14px;color:var(--muted);font-size:10px}.rightcol{display:grid;gap:16px;min-width:0}.analysisgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.insight{border:1px solid #465c37;background:linear-gradient(120deg,#1d2a24,#151f24);border-radius:12px;padding:15px 16px;margin-bottom:15px}.insight .mini{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--lime);font-weight:900}.insight p{font-size:12px;line-height:1.6;margin:7px 0 0;color:#dce6df}.chain{display:flex;align-items:stretch;gap:6px;overflow-x:auto;padding:2px 0 8px}.node{min-width:105px;flex:1;position:relative;border:1px solid #2b4052;background:#0e1923;border-radius:10px;padding:10px 9px}.node+ .node:before{content:"›";position:absolute;left:-8px;top:24px;color:var(--lime);font-size:18px;font-weight:900;z-index:1}.node.critical{border-color:#8aab4c;background:linear-gradient(150deg,#28351f,#17241e)}.node.impacted{border-color:#8c5940;background:linear-gradient(150deg,#33271f,#1e1b1a)}.nodeid{font-size:9px;letter-spacing:.1em;color:var(--muted);font-weight:800}.nodename{font-size:10px;font-weight:850;margin:5px 0 8px;line-height:1.3;min-height:25px}.nodefinish{font-size:11px;color:var(--lime);font-weight:800}.nodesub{font-size:9px;color:var(--muted)}.sectionlabel{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;font-weight:900;margin-bottom:10px}.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:10px;color:var(--muted);margin-top:8px}.legend span{display:flex;align-items:center;gap:6px}.key{width:8px;height:8px;border-radius:2px;display:inline-block;background:var(--lime)}.key.orange{background:var(--orange)}.key.blue{background:var(--blue)}.muted{color:var(--muted)}.splitstats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}.stat{background:#0d1721;border:1px solid #263648;border-radius:10px;padding:12px}.statlabel{font-size:9px;text-transform:uppercase;color:var(--muted);letter-spacing:.1em}.statvalue{font-size:22px;margin-top:5px;font-weight:800;letter-spacing:-.04em}.statdesc{font-size:10px;color:var(--muted);margin-top:4px}.smalltitle{font-size:12px;font-weight:850;margin:0 0 10px}.leaderboard{width:100%;border-collapse:collapse;font-size:11px}.leaderboard th{text-align:left;color:var(--muted);font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:10px 9px;border-bottom:1px solid #2a3b4d}.leaderboard td{padding:11px 9px;border-bottom:1px solid #223142;vertical-align:top}.leaderboard tr:last-child td{border-bottom:0}.leaderboard tr.best{background:rgba(201,243,106,.055)}.bestlabel{font-size:9px;font-weight:900;color:var(--lime);text-transform:uppercase;letter-spacing:.1em}.actionname{font-weight:800;color:#e5edf6}.actionmeta{color:var(--muted);font-size:10px;margin-top:3px;line-height:1.4}.moneypos{color:var(--lime);font-weight:850;white-space:nowrap}.moneyneg{color:var(--orange);font-weight:800;white-space:nowrap}.neutral{color:#b0c0cf;font-weight:800}.badge{display:inline-block;border:1px solid #314357;background:#0d1620;color:#b9c8d8;border-radius:6px;padding:4px 6px;font-size:9px;white-space:nowrap}.schedule-wrap{overflow-x:auto}.schedule{border-collapse:collapse;width:100%;min-width:820px;font-size:11px}.schedule th{text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:800;padding:10px 11px;border-bottom:1px solid #2b3b4d}.schedule td{padding:11px;border-bottom:1px solid #223040}.schedule tr:last-child td{border-bottom:0}.schedule tr.onpath{background:rgba(201,243,106,.04)}.taskname{font-weight:800}.taskowner{font-size:10px;color:var(--muted);margin-top:2px}.delta{font-weight:850}.barcell{min-width:160px}.mini-track{height:7px;background:#283647;border-radius:99px;overflow:hidden;position:relative}.basebar{position:absolute;left:0;top:0;height:100%;background:#4f708a;border-radius:99px;opacity:.9}.shockbar{position:absolute;left:0;top:0;height:100%;background:var(--orange);border-radius:99px;opacity:.9}.recbar{position:absolute;left:0;top:0;height:100%;background:var(--lime);border-radius:99px;opacity:.9}.footgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.listclean{padding-left:15px;margin:0;color:#aab9c8;font-size:11px}.listclean li{margin:7px 0;line-height:1.5}.footnote{font-size:10px;color:#8192a7;line-height:1.6}.footer{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-top:18px;padding:12px 4px 0;border-top:1px solid #203040;color:#667b92;font-size:10px}.error{border:1px solid #8c4545;background:#2b191c;color:#ffc3c3;border-radius:8px;padding:10px;font-size:11px;display:none;margin-bottom:12px}
+.robustness{margin-top:14px;padding:12px;border:1px solid #2d4153;background:#0d1721;border-radius:10px}.robusthead{display:flex;justify-content:space-between;align-items:center;gap:10px}.robusttitle{font-size:11px;font-weight:850}.robustflag{border-radius:5px;padding:4px 6px;font-size:9px;font-weight:900;letter-spacing:.06em}.robustflag.stable{border:1px solid #55713b;background:#1c2a1c;color:var(--lime)}.robustflag.sensitive{border:1px solid #7a5b39;background:#2b2118;color:var(--orange)}.robustdesc{font-size:10px;color:var(--muted);line-height:1.55;margin-top:7px}.robustmeter{height:6px;background:#283748;border-radius:99px;overflow:hidden;margin-top:10px}.robustfill{height:100%;border-radius:99px;background:var(--lime)}.robustfill.sensitive{background:var(--orange)}.robustchips{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}.robustchip{border:1px solid #2b3c4d;background:#111e2b;border-radius:6px;color:#afc0d0;font-size:9px;padding:4px 6px}
+@media(max-width:1050px){.hero{grid-template-columns:1fr}.layout{grid-template-columns:1fr}.analysisgrid{grid-template-columns:1fr}.hero-copy h2{font-size:30px}}
+@media(max-width:680px){.wrap{padding:16px 12px 28px}.top{align-items:flex-start;flex-direction:column}.brand h1{font-size:21px}.kpis{grid-template-columns:1fr 1fr}.kpi .value{font-size:24px}.hero-copy,.thesis{padding:17px}.panelbody{padding:13px}.footgrid{grid-template-columns:1fr}.quick{flex-direction:column}.analysisgrid{gap:12px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><div class="mark">PI</div><div><div class="eyebrow">Engineering decision systems · proof of concept</div><h1>Project Impact Lab</h1></div></div>
+    <div class="topright"><span class="pill"><i class="dot"></i> Local simulation ready</span><span class="pill">Synthetic schedule · No live integrations</span></div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-copy">
+      <div class="eyebrow" style="margin-bottom:12px">From risk visibility to action selection</div>
+      <h2>Don't just detect a delay.<br><span>Rehearse the decision.</span></h2>
+      <p>A critical-path-aware decision layer for construction teams. Inject a delay, watch its downstream effects, test recovery options, and compare estimated time saved against intervention cost—without pretending synthetic data is a production forecast.</p>
+      <div class="tags"><span class="tag">Dependency graph</span><span class="tag">Counterfactual scenarios</span><span class="tag">Critical-path sensitivity</span><span class="tag">Explainable action ranking</span><span class="tag">Human approval required</span></div>
+    </div>
+    <div class="thesis">
+      <div><div class="big">The design thesis</div><h3>A risk is not the same as a project delay.</h3><p>Two activities can be equally late, but only one may move the completion date. The useful question is which response changes the outcome enough to justify its cost.</p></div>
+      <div class="note">Research direction for Prestige Group · Designed as a complement to existing scheduling / BIM tools, not a replacement for Autodesk or Primavera.</div>
+    </div>
+  </section>
+
+  <section class="kpis">
+    <div class="kpi"><div class="label">Baseline handover</div><div class="value" id="kpiBaseline">—</div><div class="sub">Day from synthetic project start</div></div>
+    <div class="kpi"><div class="label">Scenario slip</div><div class="value warn" id="kpiSlip">—</div><div class="sub" id="kpiScenario">Calculating selected scenario</div></div>
+    <div class="kpi"><div class="label">Illustrative delay exposure</div><div class="value bad" id="kpiExposure">—</div><div class="sub">Assumption only · editable per day</div></div>
+    <div class="kpi"><div class="label">Best modeled net value</div><div class="value accent" id="kpiNet">—</div><div class="sub" id="kpiNetSub">After recovery action cost</div></div>
+  </section>
+
+  <section class="layout">
+    <aside class="panel">
+      <div class="panelhead"><h3>Scenario workbench</h3><span class="index">01 / INPUT</span></div>
+      <div class="panelbody">
+        <div id="error" class="error"></div>
+        <div class="control">
+          <label for="activity">Disruption at <span class="hint">Select activity</span></label>
+          <select id="activity"></select>
+        </div>
+        <div class="control">
+          <label for="delay">Added delay <span class="range-current"><span id="delayValue">14</span> days</span></label>
+          <input id="delay" type="range" min="0" max="45" step="1" value="14">
+          <div class="range-meta"><span>0 days</span><span>45 days</span></div>
+        </div>
+        <div class="control">
+          <label for="exposure">Delay exposure assumption <span class="range-current">₹<span id="exposureValue">4.5</span>L/day</span></label>
+          <input id="exposure" type="range" min="0" max="10" step="0.5" value="4.5">
+          <div class="range-meta"><span>₹0L/day</span><span>₹10L/day</span></div>
+        </div>
+        <button id="runButton" class="btn btn-primary">Recalculate impact →</button>
+        <div class="quick"><button id="criticalCase" class="btn btn-secondary">Critical-path case</button><button id="floatCase" class="btn btn-secondary">Test schedule float</button></div>
+        <div style="height:18px"></div>
+        <div class="assumption"><strong style="color:#dce6ef">What this model is:</strong><br>A deterministic longest-path simulation with explainable, editable assumptions. It is not an ML forecast, does not infer actual costs, and does not connect to Prestige systems.</div>
+      </div>
+    </aside>
+
+    <div class="rightcol">
+      <section class="panel">
+        <div class="panelhead"><h3>Decision brief</h3><span class="index">02 / INSIGHT</span></div>
+        <div class="panelbody">
+          <div class="insight"><div class="mini">What the model sees</div><p id="keyInsight">Loading scenario and downstream effects…</p></div>
+          <div class="analysisgrid">
+            <div>
+              <div class="sectionlabel">Controlling dependency chain · baseline</div>
+              <div id="baselineChain" class="chain"></div>
+              <div class="legend"><span><i class="key"></i> Controlling path</span><span><i class="key orange"></i> Schedule moved</span></div>
+            </div>
+            <div>
+              <div class="sectionlabel">Modeled handover comparison</div>
+              <div class="splitstats">
+                <div class="stat"><div class="statlabel">No action</div><div id="shockFinish" class="statvalue warn">—</div><div id="shockSlip" class="statdesc">—</div></div>
+                <div class="stat"><div class="statlabel">Recommended action</div><div id="bestFinish" class="statvalue accent">—</div><div id="bestSlip" class="statdesc">—</div></div>
+              </div>
+              <div class="sectionlabel">Critical-path change</div>
+              <div id="pathDiff" class="footnote">—</div>
+              <div id="robustnessCard" class="robustness" aria-live="polite"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panelhead"><h3>Recovery options ranked by modeled net value</h3><span class="index">03 / ACTION</span></div>
+        <div class="panelbody" style="padding:0">
+          <div class="schedule-wrap">
+            <table class="leaderboard"><thead><tr><th>Response</th><th>Finish</th><th>Days recovered</th><th>Cost</th><th>Net value*</th></tr></thead><tbody id="actionRows"><tr><td colspan="5">Evaluating interventions…</td></tr></tbody></table>
+          </div>
+          <div style="padding:13px 18px;border-top:1px solid #223142" class="footnote">*Net value = modeled delay days recovered × the editable daily-exposure assumption − action cost. It is a sensitivity estimate, not a business case or guaranteed saving. A human project lead decides feasibility and execution.</div>
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <div style="height:16px"></div>
+  <section class="panel">
+    <div class="panelhead"><h3>Activity-level impact trace</h3><span class="index">04 / TRACEABILITY</span></div>
+    <div class="schedule-wrap">
+      <table class="schedule"><thead><tr><th>Activity / owner</th><th>Baseline</th><th>No-action scenario</th><th>Finish shift</th><th>After recommended response</th><th>Dependency signal</th></tr></thead><tbody id="taskRows"><tr><td colspan="6">Loading schedule…</td></tr></tbody></table>
+    </div>
+  </section>
+
+  <div style="height:16px"></div>
+  <section class="footgrid">
+    <div class="panel"><div class="panelhead"><h3>How this could fit a real project stack</h3><span class="index">05 / ARCHITECTURE</span></div><div class="panelbody"><ol class="listclean"><li><strong style="color:#e4edf5">Ingest (future adapter):</strong> milestone dates and activity links from an approved schedule export; issue and procurement status from allowed data sources.</li><li><strong style="color:#e4edf5">Normalize:</strong> align IDs, calendars, owners, status timestamps and dependencies; quarantine stale or incomplete records.</li><li><strong style="color:#e4edf5">Simulate:</strong> propagate a disruption through the dependency graph and compare the original plan against plausible interventions.</li><li><strong style="color:#e4edf5">Explain:</strong> show the critical chain, affected successors, estimated recovery, assumed cost and reasons behind the ranking.</li><li><strong style="color:#e4edf5">Govern:</strong> project owner reviews the evidence and action. Log assumptions, version and approval; never auto-approve construction or regulatory decisions.</li></ol></div></div>
+    <div class="panel"><div class="panelhead"><h3>Model card & guardrails</h3><span class="index">06 / TRUST</span></div><div class="panelbody"><ul class="listclean"><li><strong style="color:#e4edf5">Method:</strong> deterministic dependency graph + longest-path schedule propagation; scenario search across a small set of illustrative recovery actions.</li><li><strong style="color:#e4edf5">Not claimed:</strong> no learned delay probability, no causal proof, no Autodesk / Primavera connection and no access to Prestige data.</li><li><strong style="color:#e4edf5">Needed for validation:</strong> approved activity histories, working calendars, resource constraints, intervention cost ranges and actual planned/actual completion outcomes.</li><li><strong style="color:#e4edf5">Before a pilot:</strong> test against historic projects, report error and sensitivity, review false alerts, verify security / access control, and retain human sign-off.</li></ul></div></div>
+  </section>
+  <footer class="footer"><span>PROJECT IMPACT LAB · Student proof of concept · Synthetic data</span><span>Concept: a decision-rehearsal layer above existing systems, not a replacement</span></footer>
+</div>
+<script>
+var latest = null;
+var activitySelect = document.getElementById('activity');
+var delayInput = document.getElementById('delay');
+var exposureInput = document.getElementById('exposure');
+var runButton = document.getElementById('runButton');
+var activityNames = {};
+
+function moneyL(value){ return '₹' + Number(value).toFixed(1) + 'L'; }
+function signed(value){ return (value > 0 ? '+' : '') + value; }
+function safeText(value){ return String(value == null ? '' : value).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+function setError(message){ var el=document.getElementById('error'); el.textContent=message || ''; el.style.display=message ? 'block' : 'none'; }
+
+async function loadCatalog(){
+  var response = await fetch('/api/catalog');
+  if(!response.ok) throw new Error('Could not load the activity catalog.');
+  var catalog = await response.json();
+  catalog.activities.forEach(function(task){
+    activityNames[task.id]=task.name;
+    var option=document.createElement('option');
+    option.value=task.id;
+    option.textContent=task.id + ' · ' + task.name;
+    activitySelect.appendChild(option);
+  });
+}
+function chainMarkup(ids, result, isBaseline){
+  if(!ids || !ids.length) return '<div class="muted">No chain found.</div>';
+  var html='';
+  ids.forEach(function(id){
+    var task=(result.activities || []).find(function(a){return a.id===id;});
+    if(!task) return;
+    var finish=isBaseline ? task.baseline_finish_day : task.shocked_finish_day;
+    var classes='node critical';
+    if(!isBaseline && task.finish_shift_days>0) classes='node impacted';
+    html+='<div class="'+classes+'"><div class="nodeid">'+safeText(id)+'</div><div class="nodename">'+safeText(task.name)+'</div><div class="nodefinish">Day '+finish+'</div><div class="nodesub">'+(task.finish_shift_days>0 ? '+'+task.finish_shift_days+'d later' : 'baseline logic')+'</div></div>';
+  });
+  return html;
+}
+function renderActions(result){
+  var rows='';
+  result.ranked_interventions.forEach(function(row,index){
+    var best=row.id===result.recommended_action.id && row.id!=='none';
+    var netClass=row.net_value_lakh>0 ? 'moneypos' : (row.net_value_lakh<0 ? 'moneyneg' : 'neutral');
+    rows+='<tr class="'+(best?'best':'')+'"><td><div class="actionname">'+safeText(row.title)+(best?' <span class="bestlabel">Top pick</span>':'')+'</div><div class="actionmeta">'+safeText(row.rationale)+'</div></td><td><span class="badge">Day '+row.project_finish_day+'</span></td><td>'+row.days_recovered+'d</td><td>'+moneyL(row.cost_lakh)+'</td><td class="'+netClass+'">'+(row.net_value_lakh>0?'+':'')+moneyL(row.net_value_lakh)+'</td></tr>';
+  });
+  document.getElementById('actionRows').innerHTML=rows;
+}
+function renderTasks(result){
+  var maxDay=Math.max(result.shocked_finish_day,result.recommended_finish_day,result.baseline_finish_day,1);
+  var rows='';
+  result.activities.forEach(function(task){
+    var shift=task.finish_shift_days;
+    var barBase=Math.max(3,100*task.baseline_finish_day/maxDay);
+    var barShock=Math.max(3,100*task.shocked_finish_day/maxDay);
+    var barRec=Math.max(3,100*task.recommended_finish_day/maxDay);
+    var flags=[];
+    if(task.downstream_of_disruption || task.id===result.disrupted_activity_id) flags.push('In impact cone');
+    if(task.on_shocked_critical_chain) flags.push('Shock critical path');
+    if(!flags.length) flags.push('No finish impact');
+    rows+='<tr class="'+(task.on_shocked_critical_chain?'onpath':'')+'"><td><div class="taskname">'+safeText(task.id)+' · '+safeText(task.name)+'</div><div class="taskowner">'+safeText(task.owner)+' · '+task.duration+' planned days</div></td><td>D'+task.baseline_start_day+'–D'+task.baseline_finish_day+'</td><td>D'+task.shocked_start_day+'–D'+task.shocked_finish_day+'</td><td class="delta '+(shift>0?'warn':'muted')+'">'+(shift>0?'+'+shift+'d':(shift<0?shift+'d':'—'))+'</td><td><div>D'+task.recommended_start_day+'–D'+task.recommended_finish_day+'</div><div class="barcell"><div class="mini-track" style="margin-top:5px"><div class="basebar" style="width:'+barBase+'%"></div><div class="shockbar" style="width:'+barShock+'%;opacity:.62"></div><div class="recbar" style="width:'+barRec+'%;opacity:.95"></div></div></div></td><td><span class="badge">'+safeText(flags.join(' · '))+'</span></td></tr>';
+  });
+  document.getElementById('taskRows').innerHTML=rows;
+}
+function renderRobustness(sensitivity){
+  if(!sensitivity) return;
+  var flagClass=sensitivity.stable?'stable':'sensitive';
+  var title=sensitivity.stable?'Stable within tested assumptions':'Sensitive to assumptions';
+  var frequency=(sensitivity.action_frequency||[]).map(function(item){
+    return '<span class="robustchip">'+safeText(item.title)+': '+item.selected_trials+'/'+sensitivity.tested_scenarios+'</span>';
+  }).join('');
+  var rangeText='Stress-tested '+sensitivity.tested_scenarios+' combinations: '+sensitivity.delay_range_days[0]+'–'+sensitivity.delay_range_days[1]+' delay days and ₹'+sensitivity.exposure_range_lakh_per_day[0]+'–₹'+sensitivity.exposure_range_lakh_per_day[1]+'L/day exposure.';
+  document.getElementById('robustnessCard').innerHTML=
+    '<div class="robusthead"><div class="robusttitle">Recommendation stability · stress test</div><span class="robustflag '+flagClass+'">'+title+'</span></div>'+
+    '<div class="robustdesc">'+safeText(sensitivity.interpretation)+' '+safeText(rangeText)+'</div>'+
+    '<div class="robustmeter"><div class="robustfill '+(sensitivity.stable?'':'sensitive')+'" style="width:'+sensitivity.stability_pct+'%"></div></div>'+
+    '<div class="robustchips">'+frequency+'</div>'+
+    '<div class="robustdesc">This is a small deterministic sensitivity check, not a confidence interval, probability estimate or Monte Carlo analysis.</div>';
+}
+
+function render(result){
+  latest=result;
+  document.getElementById('kpiBaseline').textContent='Day '+result.baseline_finish_day;
+  document.getElementById('kpiSlip').textContent=(result.shocked_slip_days>0?'+'+result.shocked_slip_days+'d':'0d');
+  document.getElementById('kpiSlip').className='value '+(result.shocked_slip_days>0?'warn':'accent');
+  document.getElementById('kpiScenario').textContent=result.disrupted_activity_name+' +'+result.delay_days+'d';
+  document.getElementById('kpiExposure').textContent=moneyL(result.gross_delay_exposure_lakh);
+  document.getElementById('kpiNet').textContent=(result.recommended_action.net_value_lakh>0?'+':'')+moneyL(result.recommended_action.net_value_lakh);
+  document.getElementById('kpiNetSub').textContent=result.recommended_action.id==='none'?'No paid response is justified':'Recommended: '+result.recommended_action.title;
+  document.getElementById('keyInsight').textContent=result.key_insight;
+  document.getElementById('shockFinish').textContent='Day '+result.shocked_finish_day;
+  document.getElementById('shockSlip').textContent=(result.shocked_slip_days>0?'+'+result.shocked_slip_days+' days vs baseline':'No finish-date movement');
+  document.getElementById('bestFinish').textContent='Day '+result.recommended_finish_day;
+  document.getElementById('bestSlip').textContent=(result.recommended_slip_days>0?'+'+result.recommended_slip_days+' days vs baseline':'On / ahead of baseline');
+  document.getElementById('baselineChain').innerHTML=chainMarkup(result.baseline_critical_chain,result,true);
+  var shockChain=chainMarkup(result.shocked_critical_chain,result,false);
+  document.getElementById('pathDiff').innerHTML='<div style="margin-bottom:8px"> <strong style="color:#dce6ef">Baseline:</strong> '+result.baseline_critical_chain.map(safeText).join(' → ')+'</div><div style="margin-bottom:8px"><strong style="color:#dce6ef">After disruption:</strong> '+result.shocked_critical_chain.map(safeText).join(' → ')+'</div><div class="muted">Impact trace contains '+result.impacted_activity_ids.length+' task(s), including the disrupted task and downstream activities.</div>';
+  renderRobustness(result.sensitivity);
+  renderActions(result);
+  renderTasks(result);
+  setError('');
+}
+async function recalculate(){
+  setError('');
+  runButton.disabled=true;
+  runButton.textContent='Recalculating scenario…';
+  document.getElementById('delayValue').textContent=delayInput.value;
+  document.getElementById('exposureValue').textContent=Number(exposureInput.value).toFixed(1);
+  try{
+    var response=await fetch('/api/scenario',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({disrupted_activity_id:activitySelect.value,delay_days:Number(delayInput.value),exposure_lakh_per_day:Number(exposureInput.value)})});
+    var body=await response.json();
+    if(!response.ok) throw new Error(body.detail || 'Scenario calculation failed.');
+    render(body);
+  }catch(error){
+    setError(error.message+' Start the API with: uvicorn app.main:app --reload');
+  }finally{
+    runButton.disabled=false;
+    runButton.textContent='Recalculate impact →';
+  }
+}
+runButton.addEventListener('click',recalculate);
+delayInput.addEventListener('input',function(){document.getElementById('delayValue').textContent=delayInput.value;});
+exposureInput.addEventListener('input',function(){document.getElementById('exposureValue').textContent=Number(exposureInput.value).toFixed(1);});
+document.getElementById('criticalCase').addEventListener('click',function(){activitySelect.value='ST-01';delayInput.value='14';recalculate();});
+document.getElementById('floatCase').addEventListener('click',function(){activitySelect.value='PR-01';delayInput.value='14';recalculate();});
+loadCatalog().then(recalculate).catch(function(error){setError(error.message+' Start the API with: uvicorn app.main:app --reload');});
+</script>
+</body>
+</html>
