@@ -3,9 +3,9 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 
-from .decision_engine import get_catalog, simulate_project
+from .decision_engine import analyze_schedule_csv, get_catalog, simulate_project
 from .risk import assess_risk
-from .schemas import ProjectTelemetry, RiskResponse, ScenarioRequest
+from .schemas import CsvScheduleRequest, ProjectTelemetry, RiskResponse, ScenarioRequest
 
 app = FastAPI(
     title="Project Impact Lab",
@@ -48,6 +48,31 @@ def scenario(request: ScenarioRequest):
             disrupted_activity_id=request.disrupted_activity_id,
             delay_days=request.delay_days,
             exposure_lakh_per_day=request.exposure_lakh_per_day,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+
+@app.get("/sample-schedule.csv")
+def sample_schedule_csv():
+    sample_file = Path(__file__).resolve().parent.parent / "static" / "sample_schedule.csv"
+    if not sample_file.exists():
+        raise HTTPException(status_code=404, detail="Sample schedule file is missing.")
+    return FileResponse(
+        sample_file,
+        media_type="text/csv",
+        filename="project-impact-lab-sample.csv",
+    )
+
+
+@app.post("/api/schedule/analyze-csv")
+def analyze_csv_schedule(request: CsvScheduleRequest):
+    try:
+        return analyze_schedule_csv(
+            csv_text=request.csv_text,
+            disrupted_task_id=request.disrupted_task_id,
+            delay_days=request.delay_days,
         )
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
