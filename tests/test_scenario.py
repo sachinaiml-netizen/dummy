@@ -224,3 +224,36 @@ def test_api_returns_total_float_and_critical_path_count():
     procurement = next(item for item in data["activities"] if item["id"] == "PR-01")
     assert procurement["baseline_total_float_days"] == 15
     assert procurement["shocked_total_float_days"] == 29  # structural delay moves the modeled project finish
+
+
+
+def test_analyzer_handles_a_long_valid_chain_without_recursion_failure():
+    tasks = [
+        {
+            "id": f"T{index}",
+            "duration": 1,
+            "predecessors": [f"T{index - 1}"] if index else [],
+        }
+        for index in range(1200)
+    ]
+    result = analyze_schedule(tasks)
+    assert result["project_finish"] == 1200
+    assert result["critical_path_count"] == 1
+    assert len(result["critical_paths"][0]) == 1200
+    assert result["total_float"]["T600"] == 0
+
+
+def test_analyzer_rejects_surrounding_whitespace_in_ids_and_invalid_override_shape():
+    try:
+        analyze_schedule([{"id": " A ", "duration": 1, "predecessors": []}])
+    except ValueError as exc:
+        assert "surrounding whitespace" in str(exc)
+    else:
+        raise AssertionError("Padded task IDs should be rejected")
+
+    try:
+        analyze_schedule([{"id": "A", "duration": 1, "predecessors": []}], duration_overrides=[])
+    except ValueError as exc:
+        assert "duration_overrides must be a dictionary" in str(exc)
+    else:
+        raise AssertionError("An invalid duration override container should be rejected")
