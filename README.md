@@ -7,6 +7,18 @@ Project Impact Lab explores a focused question: **when a construction activity s
 
 A conventional risk score is not enough for that decision. This prototype injects a delay into a task, propagates it through dependent activities, tests a small set of illustrative recovery actions, and ranks the actions by estimated net value. It is designed as a possible decision-support layer alongside existing BIM and scheduling tools—not as a replacement for Autodesk, Primavera, or a project manager.
 
+
+## Public preview
+
+- **Live browser preview:** https://project-impact-lab.vercel.app/
+- **Health API:** https://project-impact-lab.vercel.app/health
+- **Default scenario API:** https://project-impact-lab.vercel.app/api/scenario
+- **Synthetic task catalog:** https://project-impact-lab.vercel.app/api/catalog
+
+The public URL and the three GET routes were checked after deployment on 2026-10-09. The default scenario response returns baseline handover Day 119, no-action handover Day 133, and the explicitly illustrative structural recovery option. Automated CI separately tests the POST scenario route and its validation.
+
+**Deployment limitation:** the Vercel deployment is currently a manual source upload. The connected Vercel account did not have a GitHub Login Connection, so Vercel is not linked to this repository and future pushes to main will not automatically deploy. Re-deploy the latest main source or establish the GitHub connection in Vercel before relying on automatic releases. No database, custom domain, secret, or paid add-on was configured; the connected account's full billing/plan status was not readable through the available connection.
+
 ## Why this is a more useful interview demonstration
 
 It contains two deliberately contrasting scenarios:
