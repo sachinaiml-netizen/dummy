@@ -52,7 +52,7 @@ def analyze_schedule(
 
     if not isinstance(tasks, list) or not tasks:
         raise ValueError("tasks must be a non-empty list")
-    if not isinstance(max_paths_to_return, int) or max_paths_to_return < 1:
+    if isinstance(max_paths_to_return, bool) or not isinstance(max_paths_to_return, int) or max_paths_to_return < 1:
         raise ValueError("max_paths_to_return must be a positive integer")
 
     original_index: dict[str, int] = {}
@@ -64,8 +64,8 @@ def analyze_schedule(
         if not isinstance(task, dict):
             raise ValueError(f"Task at index {index} must be an object")
         task_id = task.get("id")
-        if not isinstance(task_id, str) or not task_id.strip():
-            raise ValueError(f"Task at index {index} must have a non-empty string id")
+        if not isinstance(task_id, str) or not task_id.strip() or task_id != task_id.strip():
+            raise ValueError(f"Task at index {index} must have a non-empty id without surrounding whitespace")
         if task_id in by_id:
             raise ValueError(f"Duplicate task id: {task_id}")
         duration = task.get("duration")
@@ -76,8 +76,8 @@ def analyze_schedule(
         pred_list = task.get("predecessors", [])
         if not isinstance(pred_list, list):
             raise ValueError(f"Predecessors for {task_id} must be a list")
-        if any(not isinstance(pred, str) or not pred.strip() for pred in pred_list):
-            raise ValueError(f"Predecessors for {task_id} must be non-empty string ids")
+        if any(not isinstance(pred, str) or not pred.strip() or pred != pred.strip() for pred in pred_list):
+            raise ValueError(f"Predecessors for {task_id} must be trimmed, non-empty string ids")
         if len(set(pred_list)) != len(pred_list):
             raise ValueError(f"Duplicate predecessor in task {task_id}")
         if task_id in pred_list:
@@ -92,6 +92,8 @@ def analyze_schedule(
             if pred not in by_id:
                 raise ValueError(f"Unknown predecessor {pred!r} referenced by task {task_id}")
 
+    if duration_overrides is not None and not isinstance(duration_overrides, dict):
+        raise ValueError("duration_overrides must be a dictionary")
     for task_id, duration in (duration_overrides or {}).items():
         if task_id not in by_id:
             raise ValueError(f"Duration override references unknown task: {task_id}")
@@ -195,24 +197,23 @@ def analyze_schedule(
 
     critical_paths: list[list[str]] = []
     truncated = False
-
-    def visit(task_id: str, path: list[str]) -> None:
-        nonlocal truncated
-        if len(critical_paths) >= max_paths_to_return:
-            truncated = True
-            return
-        if task_id in critical_terminals:
-            critical_paths.append(path + [task_id])
-            return
-        for succ in critical_successors[task_id]:
-            if truncated:
-                return
-            visit(succ, path + [task_id])
-
+    # Iterative DFS avoids Python recursion limits on long but valid activity chains.
+    stop_enumerating = False
     for source in critical_sources:
-        if truncated:
+        if stop_enumerating:
             break
-        visit(source, [])
+        stack: list[tuple[str, list[str]]] = [(source, [source])]
+        while stack:
+            task_id, path = stack.pop()
+            if task_id in critical_terminals:
+                critical_paths.append(path)
+                if len(critical_paths) >= max_paths_to_return:
+                    truncated = critical_path_count > len(critical_paths)
+                    stop_enumerating = True
+                    break
+                continue
+            for succ in reversed(critical_successors[task_id]):
+                stack.append((succ, path + [succ]))
 
     return {
         "start": early_start,
