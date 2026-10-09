@@ -18,7 +18,15 @@ The product's currently emphasised workflow is **Float-Burn Watch**: show how a 
 
 This core logic follows the basic forward/backward-pass and total-float concepts documented in Oracle Primavera Cloud's [Scheduling Overview](https://primavera.oraclecloud.com/help/en/user/88251.htm). Oracle separately documents loop checks and notes that calendars, relationship lags and resource levelling affect real project schedules: [Schedule a Project](https://primavera.oraclecloud.com/help/en/user/88257.htm). Project Impact Lab does not implement those features.
 
-## 2. Legacy snapshot-risk endpoint
+## 2. CSV schedule adapter
+
+The `POST /api/schedule/analyze-csv` route accepts JSON containing CSV text, an optional task ID to delay and a delay from 0 to 60 days. The documented required columns are `task_id`, `task_name`, `duration_days` and `predecessors`; `owner` and `stream` are optional. Multiple predecessor IDs are separated by `|`.
+
+The adapter uses Python's standard-library CSV parser, applies size and activity-count limits, rejects duplicate headers and IDs, missing required values, invalid durations, unknown predecessor IDs and cycles, then runs the shared `analyze_schedule` CPM engine on baseline and scenario durations. The result contains finish dates, float by activity, critical-path lists/counts and a human-readable summary. Uploaded contents are not written to an application database.
+
+**Boundary:** this is a small CSV schema, not a native Primavera P6 XER/XML parser. Oracle documents P6 XML/XER as exchange formats ([import/export overview](https://primavera.oraclecloud.com/help/en/user/95912.htm)). A production pilot would require an authorised export/mapping layer, validation of schedule calendars and constraints, and project-controls review.
+
+## 3. Legacy snapshot-risk endpoint
 
 The separate `POST /risk` endpoint returns a weighted score from schedule gap, budget variance, vendor delay, unresolved issues and quality defects. A bounded rule-based deviation index is retained under the legacy response key `anomaly_score` for compatibility.
 
@@ -26,6 +34,6 @@ The deviation index normalizes each signal against an illustrative reference ran
 
 This rule-based design is intentional: fitting an Isolation Forest to synthetic samples creates no evidence of real-world anomaly detection and adds substantial runtime dependencies without strengthening the project's primary schedule-decision demonstration.
 
-## 3. Production evolution
+## 4. Production evolution
 
 A real pilot should use approved historic project snapshots and schedules. Calibrate any scoring thresholds with domain experts, evaluate against held-out time periods, compare against a simple baseline, and report false-positive/false-negative behaviour before presenting any model as validated. Preserve feature provenance, thresholds, model/version metadata and human review records.
