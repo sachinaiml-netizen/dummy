@@ -85,5 +85,5 @@ def test_float_case_can_show_a_fragile_decision_near_the_threshold():
     sensitivity = result["sensitivity"]
     assert sensitivity["tested_scenarios"] == 9
     assert any(item["id"] == "none" for item in sensitivity["action_frequency"])
-    assert any(item["id"] == "supplier_expedite" for item in sensitivity["action_frequency"])
+    assert any(item["id"] == "handover_sprint" for item in sensitivity["action_frequency"])
     assert sensitivity["stable"] is False
