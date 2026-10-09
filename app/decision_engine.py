@@ -436,6 +436,7 @@ def simulate_project(
             "recommended_finish_day": best_schedule["finish"][task_id],
             "baseline_total_float_days": baseline["total_float"][task_id],
             "shocked_total_float_days": shocked["total_float"][task_id],
+            "total_float_change_days": shocked["total_float"][task_id] - baseline["total_float"][task_id],
             "recommended_total_float_days": best_schedule["total_float"][task_id],
             "on_baseline_critical_path": task_id in baseline["critical_task_ids"],
             "on_shocked_critical_path": task_id in shocked["critical_task_ids"],
@@ -446,10 +447,40 @@ def simulate_project(
         })
 
     disrupted = task_by_id[disrupted_activity_id]
-    if slip_days == 0 and delay_days > 0:
+    disrupted_baseline_float = baseline["total_float"][disrupted_activity_id]
+    disrupted_scenario_float = shocked["total_float"][disrupted_activity_id]
+    float_consumed_days = max(0, disrupted_baseline_float - disrupted_scenario_float)
+
+    # Prefer the most decision-relevant explanation: float being consumed,
+    # float reaching zero, or the delay crossing the activity's available float.
+    if delay_days > 0 and disrupted_baseline_float > 0 and slip_days > 0:
+        key_insight = (
+            f"The {delay_days}-day delay on {disrupted['name']} exceeds its original "
+            f"{disrupted_baseline_float}-day total float by {max(0, delay_days - disrupted_baseline_float)} day(s). "
+            f"Under this simplified network, modeled handover moves by {slip_days} day(s), to Day {shocked_finish}."
+        )
+    elif delay_days > 0 and disrupted_baseline_float > 0 and disrupted_scenario_float == 0:
+        key_insight = (
+            f"The {delay_days}-day delay on {disrupted['name']} has consumed all "
+            f"{disrupted_baseline_float} day(s) of its original float. Handover has not moved yet, "
+            "but this path is now critical alongside the other controlling path; one additional day of delay "
+            "would move modeled handover under these assumptions."
+        )
+    elif (
+        delay_days > 0
+        and disrupted_baseline_float > 0
+        and disrupted_scenario_float <= 3
+        and disrupted_scenario_float > 0
+    ):
+        key_insight = (
+            f"The {delay_days}-day delay on {disrupted['name']} has consumed "
+            f"{float_consumed_days} of its {disrupted_baseline_float} original float day(s). "
+            f"Handover has not moved yet, but only {disrupted_scenario_float} day(s) of float remain."
+        )
+    elif slip_days == 0 and delay_days > 0:
         key_insight = (
             f"The {delay_days}-day delay on {disrupted['name']} does not change the modeled handover date. "
-            "A parallel dependency chain still controls completion, so a paid recovery action is not justified "
+            "The remaining dependency path still controls completion, so a paid recovery action is not justified "
             "by finish-date savings under these assumptions."
         )
     elif recommended_action_id != "none":
@@ -470,6 +501,9 @@ def simulate_project(
         "is_synthetic_demo": True,
         "disrupted_activity_id": disrupted_activity_id,
         "disrupted_activity_name": disrupted["name"],
+        "disrupted_activity_baseline_total_float_days": disrupted_baseline_float,
+        "disrupted_activity_scenario_total_float_days": disrupted_scenario_float,
+        "disrupted_activity_float_consumed_days": float_consumed_days,
         "delay_days": delay_days,
         "exposure_lakh_per_day": round(exposure_lakh_per_day, 2),
         "baseline_finish_day": baseline_finish,
