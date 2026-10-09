@@ -437,6 +437,9 @@ def simulate_project(
             "baseline_total_float_days": baseline["total_float"][task_id],
             "shocked_total_float_days": shocked["total_float"][task_id],
             "recommended_total_float_days": best_schedule["total_float"][task_id],
+            "on_baseline_critical_path": task_id in baseline["critical_task_ids"],
+            "on_shocked_critical_path": task_id in shocked["critical_task_ids"],
+            # Legacy field names retained for clients using the original response shape.
             "on_baseline_critical_chain": task_id in baseline["critical_task_ids"],
             "on_shocked_critical_chain": task_id in shocked["critical_task_ids"],
             "downstream_of_disruption": task_id in affected_descendants,
