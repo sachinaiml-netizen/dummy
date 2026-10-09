@@ -48,6 +48,13 @@ These are deterministic calculations on an invented eight-activity network with 
 2. **Recalculate the schedule.** The engine validates the links, orders tasks by dependency, then performs Critical Path Method (CPM) forward and backward passes.
 3. **Explain the impact.** It shows modeled handover, activity total float, critical paths and a short message explaining whether float remains or the finish date moves. One-click presets let the user compare 14-, 15- and 16-day delays without manually adjusting controls.
 4. **Compare hypothetical actions.** It applies one assumed recovery action at a time and compares schedule days recovered against an editable illustrative cost exposure. A project team must validate the feasibility and costs before acting.
+5. **Bring a different schedule.** The CSV intake accepts a documented activity table and runs the same CPM checks over it, rather than assuming every project has our built-in eight activities.
+
+## CSV input boundary
+
+For a configurable demonstration, the app accepts `task_id, task_name, duration_days, predecessors` columns (optional: `owner, stream`). Multiple predecessor IDs use `|`. It rejects duplicate task IDs, invalid durations, missing predecessor references and cycles before showing schedule output. The provided CSV is synthetic.
+
+This does not parse native Primavera P6 XER/XML files, and it is not a live integration. Oracle documents P6 XML/XER as exchange formats; a real pilot would need an approved export/mapping adapter and validation against the project's scheduling rules. Use non-confidential data only.
 
 ## Why this is relevant to large construction organisations
 
