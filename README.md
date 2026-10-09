@@ -3,9 +3,11 @@
 
 **Research proof of concept · synthetic schedule and cost assumptions · no Prestige confidential data · not a production forecasting system**
 
+**Problem being tested:** when a delay is reported, is it consuming schedule float or moving handover—and what recovery option should a project-controls lead investigate first? See [Problem Statement](docs/PROBLEM_STATEMENT.md), [Competitive Research](docs/COMPETITIVE_RESEARCH.md) and the [Six-Hour Learning Guide](docs/SIX_HOUR_LEARNING_GUIDE.md).
+
 Project Impact Lab explores a focused question: **when a construction activity slips, which response is actually worth paying for, given the project's dependency network and the effect on the completion date?**
 
-A conventional risk score is not enough for that decision. This prototype injects a delay into a task, propagates it through dependent activities, tests a small set of illustrative recovery actions, and ranks the actions by estimated net value. It is designed as a possible decision-support layer alongside existing BIM and scheduling tools—not as a replacement for Autodesk, Primavera, or a project manager.
+The current feature is called **Float-Burn Watch**: it demonstrates how an activity's available schedule buffer shrinks as a delay is injected. This is a focused scenario explanation, not an assertion of a unique market capability. A conventional risk score is not enough for that decision. This prototype injects a delay into a task, propagates it through dependent activities, tests a small set of illustrative recovery actions, and ranks the actions by estimated net value. It is designed as a possible decision-support layer alongside existing BIM and scheduling tools—not as a replacement for Autodesk, Primavera, or a project manager.
 
 
 ## Public preview
