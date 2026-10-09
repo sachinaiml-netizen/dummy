@@ -46,7 +46,7 @@ These are deterministic calculations on an invented eight-activity network with 
 
 1. **Choose an activity and delay.** The user changes one activity's duration by a specified number of days.
 2. **Recalculate the schedule.** The engine validates the links, orders tasks by dependency, then performs Critical Path Method (CPM) forward and backward passes.
-3. **Explain the impact.** It shows modeled handover, activity total float, critical paths and a short message explaining whether float remains or the finish date moves.
+3. **Explain the impact.** It shows modeled handover, activity total float, critical paths and a short message explaining whether float remains or the finish date moves. One-click presets let the user compare 14-, 15- and 16-day delays without manually adjusting controls.
 4. **Compare hypothetical actions.** It applies one assumed recovery action at a time and compares schedule days recovered against an editable illustrative cost exposure. A project team must validate the feasibility and costs before acting.
 
 ## Why this is relevant to large construction organisations
@@ -64,6 +64,12 @@ These examples show that advanced construction technology is already a mature an
 The proposal is deliberately narrow: put **float consumed → path becomes critical → potential handover effect → cost-assumption comparison** in one simple, inspectable teaching/demo workflow. A user can see the exact input that changed the result rather than treating a risk score as an answer.
 
 This is a prototype-level product hypothesis, not a claim of exclusive capability. Oracle Primavera Cloud already provides multiple float paths, so our basic CPM and near-critical-path logic are established practice, not novel research.
+
+## Prestige context: how to use the research responsibly
+
+April 2026 trade-press coverage reported a three-year Prestige Group–Autodesk collaboration and described a connected design-to-execution environment, including 4D/5D workflows. This is relevant context, but the report is secondary coverage and does not reveal Prestige's internal project-controls process or prove a gap. Say that you read the coverage and ask how the interviewer's team currently handles float erosion and near-critical paths. Do not suggest the company lacks these capabilities.
+
+The hypothesis is not "Prestige needs a new CPM tool." It is: **can this short, visual 14/15/16-day threshold demonstration help a user explain float burn quickly and consistently alongside existing scheduling software?** If their current system already does this well, the prototype has not demonstrated additional value.
 
 ## What evidence could prove or disprove the idea?
 
@@ -90,6 +96,9 @@ The hypothesis is disproved if the existing workflow already communicates these 
 7. China State Construction Engineering Corporation, Intelligent Construction: https://en.cscec.com/english_cscec/ChineseConstruction/PromotingChinabuilt/IntelligentConstruction/
 8. China Communications Construction Company, “Smart construction: Digital twin technology drives modern management systems,” published 28 February 2025: https://en.ccccltd.cn/xwzx/ztbd/202502/t20250228_219358.html
 9. China National Railway Administration, 2026 technical standard for railway construction management information models and end-to-end BIM application (Chinese): https://source.nra.gov.cn/xwzx/xwxx/gdxw/202605/t20260508_351199.shtml
+10. Prestige / Autodesk collaboration, as reported by First Construction Council (secondary source), 14 April 2026: https://firstconstructioncouncil.com/article/915057
+11. Autodesk official announcement: Autodesk Construction Cloud becomes Autodesk Forma, 24 March 2026: https://adsknews.autodesk.com/en/news/autodesk-construction-cloud-is-now-autodesk-forma/
+12. China State Construction Engineering Corporation, 2026 intelligent construction showcase: https://en.cscec.com/english_cscec/CompanyNews/CorporateNews/202609/3961316.html
 
 ## How to talk about using AI
 
