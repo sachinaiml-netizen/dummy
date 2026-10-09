@@ -67,3 +67,23 @@ def test_api_rejects_unknown_activity():
         },
     )
     assert response.status_code == 422
+
+
+
+def test_critical_path_case_exposes_assumption_sensitivity():
+    result = simulate_project("ST-01", 14, 4.5)
+    sensitivity = result["sensitivity"]
+    assert sensitivity["tested_scenarios"] == 9
+    assert sensitivity["delay_range_days"] == [10, 18]
+    assert sensitivity["stable"] is False
+    assert sensitivity["stability_pct"] < 100
+    assert any(item["selected_trials"] > 0 for item in sensitivity["action_frequency"])
+
+
+def test_float_case_can_show_a_fragile_decision_near_the_threshold():
+    result = simulate_project("PR-01", 14, 4.5)
+    sensitivity = result["sensitivity"]
+    assert sensitivity["tested_scenarios"] == 9
+    assert any(item["id"] == "none" for item in sensitivity["action_frequency"])
+    assert any(item["id"] == "supplier_expedite" for item in sensitivity["action_frequency"])
+    assert sensitivity["stable"] is False
