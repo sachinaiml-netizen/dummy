@@ -544,3 +544,211 @@ def get_catalog() -> dict[str, Any]:
         "interventions": deepcopy(INTERVENTIONS),
         "default_exposure_lakh_per_day": EXAMPLE_EXPOSURE_LAKH_PER_DAY,
     }
+
+
+def analyze_schedule_csv(
+    csv_text: str,
+    disrupted_task_id: str | None = None,
+    delay_days: int = 0,
+) -> dict[str, Any]:
+    """Validate the documented four-column CSV and analyse baseline vs one delay.
+
+    Accepted columns: task_id, task_name, duration_days, predecessors.
+    Multiple predecessors use a pipe separator (A-01|B-02). This is a small
+    adapter format, not a native Primavera P6 XER/XML importer.
+    """
+    import csv
+    import io
+    import math
+
+    if not isinstance(csv_text, str) or not csv_text.strip():
+        raise ValueError("CSV content is empty")
+    if len(csv_text) > 250_000:
+        raise ValueError("CSV exceeds the 250,000-character limit")
+    if isinstance(delay_days, bool) or not isinstance(delay_days, int) or not 0 <= delay_days <= 60:
+        raise ValueError("delay_days must be an integer between 0 and 60")
+    if disrupted_task_id is not None:
+        if not isinstance(disrupted_task_id, str) or not disrupted_task_id.strip():
+            raise ValueError("disrupted_task_id must be a non-empty task ID")
+        if disrupted_task_id != disrupted_task_id.strip():
+            raise ValueError("disrupted_task_id must not contain surrounding whitespace")
+    elif delay_days:
+        raise ValueError("Select a disrupted task before adding a delay")
+
+    try:
+        reader = csv.DictReader(io.StringIO(csv_text.lstrip("\ufeff"), newline=""))
+        raw_headers = reader.fieldnames
+    except csv.Error as exc:
+        raise ValueError(f"Could not read CSV header: {exc}") from exc
+
+    if not raw_headers:
+        raise ValueError("CSV is missing its header row")
+    normalized_headers = [header.strip().lower() if header else "" for header in raw_headers]
+    if any(not header for header in normalized_headers):
+        raise ValueError("CSV headers must not be blank")
+    if len(set(normalized_headers)) != len(normalized_headers):
+        raise ValueError("CSV contains duplicate column names")
+    required_headers = {"task_id", "task_name", "duration_days", "predecessors"}
+    missing = sorted(required_headers - set(normalized_headers))
+    if missing:
+        raise ValueError("CSV is missing required columns: " + ", ".join(missing))
+    header_map = dict(zip(normalized_headers, raw_headers))
+
+    parsed_tasks: list[dict[str, Any]] = []
+    seen_ids: set[str] = set()
+    try:
+        for row_index, row in enumerate(reader, start=2):
+            if None in row:
+                raise ValueError(f"Row {row_index} has more values than the header")
+            if all(value is None or not str(value).strip() for value in row.values()):
+                continue
+
+            def field(key: str) -> str:
+                value = row.get(header_map[key])
+                if value is None:
+                    return ""
+                return str(value).strip()
+
+            task_id = field("task_id")
+            name = field("task_name")
+            duration_raw = field("duration_days")
+            predecessor_raw = field("predecessors")
+            if not task_id:
+                raise ValueError(f"Row {row_index}: task_id is required")
+            if len(task_id) > 80:
+                raise ValueError(f"Row {row_index}: task_id exceeds 80 characters")
+            if task_id != task_id.strip():
+                raise ValueError(f"Row {row_index}: task_id has surrounding whitespace")
+            if task_id in seen_ids:
+                raise ValueError(f"Row {row_index}: duplicate task_id {task_id!r}")
+            if not name:
+                raise ValueError(f"Row {row_index}: task_name is required for every activity")
+            if len(name) > 160:
+                raise ValueError(f"Row {row_index}: task_name exceeds 160 characters")
+            if not duration_raw:
+                raise ValueError(f"Row {row_index}: duration_days is required")
+            try:
+                duration = float(duration_raw)
+            except ValueError as exc:
+                raise ValueError(f"Row {row_index}: duration_days must be a number") from exc
+            if not math.isfinite(duration) or duration <= 0:
+                raise ValueError(f"Row {row_index}: duration_days must be a positive finite number")
+
+            predecessors = [part.strip() for part in predecessor_raw.split("|") if part.strip()]
+            parsed_tasks.append({
+                "id": task_id,
+                "name": name,
+                "duration": int(duration) if duration.is_integer() else duration,
+                "predecessors": predecessors,
+                "owner": field("owner") or "Unassigned",
+                "stream": field("stream") or "Imported CSV",
+            })
+            seen_ids.add(task_id)
+            if len(parsed_tasks) > 2000:
+                raise ValueError("CSV exceeds the 2,000-activity limit")
+    except csv.Error as exc:
+        raise ValueError(f"CSV parsing failed: {exc}") from exc
+
+    if not parsed_tasks:
+        raise ValueError("CSV contains no activity rows")
+
+    task_by_id = {task["id"]: task for task in parsed_tasks}
+    if disrupted_task_id is not None and disrupted_task_id not in task_by_id:
+        raise ValueError(f"Unknown disrupted task ID: {disrupted_task_id}")
+
+    baseline = analyze_schedule(parsed_tasks, max_paths_to_return=64)
+    overrides: dict[str, int | float] = {}
+    if disrupted_task_id and delay_days:
+        overrides[disrupted_task_id] = task_by_id[disrupted_task_id]["duration"] + delay_days
+    scenario = analyze_schedule(parsed_tasks, overrides, max_paths_to_return=64)
+
+    baseline_finish = baseline["project_finish"]
+    scenario_finish = scenario["project_finish"]
+    finish_slip = max(0, scenario_finish - baseline_finish)
+    activities: list[dict[str, Any]] = []
+    for task_id in baseline["topological_order"]:
+        task = task_by_id[task_id]
+        baseline_float = baseline["total_float"][task_id]
+        scenario_float = scenario["total_float"][task_id]
+        activities.append({
+            "task_id": task_id,
+            "task_name": task["name"],
+            "duration_days": task["duration"],
+            "scenario_duration_days": scenario["duration"][task_id],
+            "predecessors": task["predecessors"],
+            "owner": task["owner"],
+            "baseline_early_start_day": baseline["early_start"][task_id],
+            "baseline_early_finish_day": baseline["early_finish"][task_id],
+            "scenario_early_start_day": scenario["early_start"][task_id],
+            "scenario_early_finish_day": scenario["early_finish"][task_id],
+            "finish_shift_days": scenario["early_finish"][task_id] - baseline["early_finish"][task_id],
+            "baseline_total_float_days": baseline_float,
+            "scenario_total_float_days": scenario_float,
+            "float_consumed_days": max(0, baseline_float - scenario_float),
+            "on_baseline_critical_path": task_id in baseline["critical_task_ids"],
+            "on_scenario_critical_path": task_id in scenario["critical_task_ids"],
+        })
+
+    base_task_float = baseline["total_float"].get(disrupted_task_id) if disrupted_task_id else None
+    scenario_task_float = scenario["total_float"].get(disrupted_task_id) if disrupted_task_id else None
+    if not disrupted_task_id:
+        key_insight = (
+            f"Validated {len(parsed_tasks)} activities. The modeled baseline finish is Day {baseline_finish}. "
+            "Choose an activity and add a hypothetical delay to test float burn."
+        )
+    elif delay_days == 0:
+        key_insight = (
+            f"No additional delay was applied to {task_by_id[disrupted_task_id]['name']}. "
+            f"The modeled finish remains Day {scenario_finish}."
+        )
+    elif base_task_float and scenario_task_float and scenario_task_float > 0:
+        key_insight = (
+            f"The {delay_days}-day delay consumes {max(0, base_task_float - scenario_task_float)} "
+            f"of {base_task_float} original float days on {task_by_id[disrupted_task_id]['name']}; "
+            f"{scenario_task_float} day(s) remain. Modeled handover stays at Day {scenario_finish}."
+        )
+    elif base_task_float and base_task_float > 0 and scenario_task_float == 0 and finish_slip == 0:
+        key_insight = (
+            f"The delay consumes all {base_task_float} original float day(s) on "
+            f"{task_by_id[disrupted_task_id]['name']}. Its path is now critical; modeled handover "
+            f"still stays at Day {scenario_finish}. One more day of delay may move the finish."
+        )
+    elif finish_slip > 0:
+        key_insight = (
+            f"The delay on {task_by_id[disrupted_task_id]['name']} moves modeled handover "
+            f"by {finish_slip} day(s), from Day {baseline_finish} to Day {scenario_finish}."
+        )
+    else:
+        key_insight = (
+            f"The delay does not move modeled handover from Day {baseline_finish}. "
+            "Review the activity's remaining float and other controlling paths before selecting a response."
+        )
+
+    return {
+        "analysis_type": "generic_csv_schedule",
+        "is_synthetic_demo": True,
+        "activity_count": len(parsed_tasks),
+        "disrupted_task_id": disrupted_task_id,
+        "delay_days": delay_days,
+        "baseline_finish_day": baseline_finish,
+        "scenario_finish_day": scenario_finish,
+        "handover_slip_days": finish_slip,
+        "disrupted_task_baseline_total_float_days": base_task_float,
+        "disrupted_task_scenario_total_float_days": scenario_task_float,
+        "disrupted_task_float_consumed_days": (
+            max(0, base_task_float - scenario_task_float)
+            if base_task_float is not None and scenario_task_float is not None else None
+        ),
+        "baseline_critical_path_count": baseline["critical_path_count"],
+        "scenario_critical_path_count": scenario["critical_path_count"],
+        "baseline_critical_paths": baseline["critical_paths"],
+        "scenario_critical_paths": scenario["critical_paths"],
+        "critical_paths_truncated": baseline["critical_paths_truncated"] or scenario["critical_paths_truncated"],
+        "activities": activities,
+        "key_insight": key_insight,
+        "format_note": (
+            "Accepted format: task_id, task_name, duration_days, predecessors. "
+            "Use | between predecessor IDs. Optional columns: owner, stream. "
+            "This adapter does not parse native Primavera P6 XER/XML files."
+        ),
+    }
