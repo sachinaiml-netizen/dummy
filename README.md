@@ -39,6 +39,7 @@ These are deterministic examples built from made-up durations, dependencies, act
 - Comparison of five hypothetical intervention options plus no action.
 - Ranking by days recovered, action cost and modelled net value.
 - A 3×3 deterministic assumption stress grid showing whether the preferred action remains stable when delay and daily-exposure assumptions change.
+- One-click demo presets for the 14/15/16-day float threshold and a structural recovery comparison, so the interview demo does not rely on manual slider positioning.
 - Pydantic input validation and tests for critical-path impact, schedule float, tied paths, non-topological input order, cycles, unknown predecessors, invalid durations and bounded critical-path output.
 - Legacy /risk endpoint retained with a transparent rule-based snapshot score and bounded deviation indicator; it does not claim to run an ML anomaly detector.
 
