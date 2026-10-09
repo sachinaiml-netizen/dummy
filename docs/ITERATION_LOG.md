@@ -4,7 +4,7 @@
 
 - Mission start: 2026-10-09 19:15 IST (Asia/Kolkata)
 - Mission deadline: 2026-10-10 19:15 IST (Asia/Kolkata)
-- Current iteration: 1
+- Current iteration: 5
 - Time discipline: work occurs only when the user sends a new IMPROVE or FINALIZE message; no background execution is implied.
 - Source of truth at iteration start: main at commit 9e0f0b5a78e93ddf0e566b89517056530c6d0e2b.
 
@@ -100,3 +100,12 @@ This log is itself part of iteration 1. Append timestamped entries rather than r
 - Public route checks passed for `/`, `/health`, and `/api/scenario`. Public HTML fetch confirms the Float-Burn Watch problem statement and new threshold workflow content; automated test `test_dashboard_exposes_one_click_float_threshold_scenarios` checks the three button IDs, labels and explanation are served by FastAPI. Existing API tests cover 14-, 15- and 16-day procurement scenarios, including 1 day of float, zero float/tied paths, and one-day handover slip.
 - Attempted a live browser click-through to exercise the three buttons, but the metered browser tool did not start because its wallet balance was negative. No top-up was made, consistent with the no-paid-services constraint. Therefore the actual click sequence is **not verified by external browser automation**; CI and public GET checks passed. Do not represent this as a successful click-through.
 - Deployment remains manually uploaded, not GitHub-linked. The preview URL is current to this iteration's runtime commit, but later code changes will require another manual deployment.
+
+
+## Iteration 5 — interview clarity and explainability
+
+- Trigger: user explicitly asked to keep improving the construction interview project while keeping the problem statement and architecture learnable in five to six hours.
+- Research basis carried forward: Oracle Primavera Cloud already supports CPM, total float and multiple float paths; Autodesk Forma/Construction IQ documents construction risk analytics; CSCEC and CCCC publicly document intelligent construction, BIM/GIS, IoT and digital-twin decision support. Existing products mean we must not claim the underlying algorithm or broad capability is globally unique.
+- Product decision: keep Float-Burn Watch as the focused feature. Its defensible hypothesis is a very short, inspectable threshold explanation (14/15/16-day procurement delay), not replacing a commercial scheduler.
+- Implemented: added `docs/INTERVIEW_ONE_PAGE.md`, with the 45-second problem statement, synthetic example, frontend/backend data flow, file map, CPM definitions, value formula, competitive honesty, AI-assisted development disclosure, limitations and likely interview questions. README now links to this one-page guide first.
+- Validation: documentation-only change; CI should pass before merge. No application code or live deployment changes are required for this iteration. The live preview remains manually deployed and is not GitHub-linked.
