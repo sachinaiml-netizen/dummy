@@ -199,3 +199,28 @@ def test_analyzer_bounds_materialized_critical_paths_but_reports_exact_count():
     assert result["critical_path_count"] == 4
     assert len(result["critical_paths"]) == 1
     assert result["critical_paths_truncated"] is True
+
+
+
+def test_procurement_delay_exhausting_float_exposes_tied_critical_paths():
+    result = simulate_project("PR-01", 15, 4.5)
+    assert result["baseline_finish_day"] == 119
+    assert result["shocked_finish_day"] == 119
+    assert result["shocked_slip_days"] == 0
+    assert result["shocked_critical_path_count"] == 2
+    path_set = {tuple(path) for path in result["shocked_critical_paths"]}
+    assert ("AP-01", "DS-01", "ST-01", "FC-01", "IN-01", "HO-01") in path_set
+    assert ("AP-01", "DS-01", "PR-01", "ME-01", "IN-01", "HO-01") in path_set
+    activities = {item["id"]: item for item in result["activities"]}
+    assert activities["PR-01"]["shocked_total_float_days"] == 0
+    assert activities["ME-01"]["shocked_total_float_days"] == 0
+
+
+def test_api_returns_total_float_and_critical_path_count():
+    response = client.get("/api/scenario")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["baseline_critical_path_count"] == 1
+    procurement = next(item for item in data["activities"] if item["id"] == "PR-01")
+    assert procurement["baseline_total_float_days"] == 15
+    assert procurement["shocked_total_float_days"] == 15
