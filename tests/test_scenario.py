@@ -87,3 +87,19 @@ def test_float_case_can_show_a_fragile_decision_near_the_threshold():
     assert any(item["id"] == "none" for item in sensitivity["action_frequency"])
     assert any(item["id"] == "handover_sprint" for item in sensitivity["action_frequency"])
     assert sensitivity["stable"] is False
+
+
+def test_browser_dashboard_is_served_by_fastapi():
+    response = client.get("/")
+    assert response.status_code == 200
+    assert "text/html" in response.headers["content-type"]
+    assert "Project Impact Lab" in response.text
+
+
+def test_vercel_config_includes_runtime_dashboard_asset():
+    import json
+    from pathlib import Path
+
+    config = json.loads(Path("vercel.json").read_text(encoding="utf-8"))
+    assert config["framework"] == "fastapi"
+    assert config["functions"]["app/main.py"]["includeFiles"] == "static/**"
