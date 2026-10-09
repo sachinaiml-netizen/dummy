@@ -3,7 +3,7 @@
 
 **Research proof of concept · synthetic schedule and cost assumptions · no Prestige confidential data · not a production forecasting system**
 
-**Problem being tested:** when a delay is reported, is it consuming schedule float or moving handover—and what recovery option should a project-controls lead investigate first? See [Problem Statement](docs/PROBLEM_STATEMENT.md), [Competitive Research](docs/COMPETITIVE_RESEARCH.md) and the [Six-Hour Learning Guide](docs/SIX_HOUR_LEARNING_GUIDE.md).
+**Problem being tested:** when a delay is reported, is it consuming schedule float or moving handover—and what recovery option should a project-controls lead investigate first? Start with the [Interview One-Page](docs/INTERVIEW_ONE_PAGE.md), then use the [Problem Statement](docs/PROBLEM_STATEMENT.md), [Competitive Research](docs/COMPETITIVE_RESEARCH.md) and [Six-Hour Learning Guide](docs/SIX_HOUR_LEARNING_GUIDE.md).
 
 Project Impact Lab explores a focused question: **when a construction activity slips, which response is actually worth paying for, given the project's dependency network and the effect on the completion date?**
 
