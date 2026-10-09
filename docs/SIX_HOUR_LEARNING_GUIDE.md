@@ -39,13 +39,15 @@ Understand:
 - **FastAPI** defines URL routes the browser or another program can call.
 - GET /api/scenario returns the default scenario.
 - POST /api/scenario accepts a chosen activity, number of delay days and illustrative daily-exposure assumption.
+- POST /api/schedule/analyze-csv accepts a bounded CSV text payload, optional activity ID and delay. Its CSV parser validates the task network before calling the same CPM engine.
+- GET /sample-schedule.csv downloads an invented eight-activity example. The accepted CSV schema is not a native Primavera export format.
 - **Pydantic** checks incoming fields and their ranges before the endpoint calls the engine.
 - JSON is the format used to send structured results from Python back to JavaScript.
 - requirements.txt contains packages needed by the running app; requirements-dev.txt contains extra packages used for tests.
 
 ### Block 4 — The scheduling engine (70 minutes)
 
-Read app/decision_engine.py, focusing only on analyze_schedule, _schedule and simulate_project.
+Read app/decision_engine.py, focusing on analyze_schedule, analyze_schedule_csv, _schedule and simulate_project.
 
 Use this mental model:
 1. **Validate:** every task ID must be unique; every predecessor must exist; duration must be positive; dependencies cannot contain a loop.
@@ -67,7 +69,7 @@ Know this formula:
 
 For the default case: 6 × ₹4.5 lakh − ₹8 lakh = ₹19 lakh of *illustrative modeled net value*. It is not actual savings.
 
-Tests are executable examples of expected behaviour. The suite checks ordinary cases and edge cases, such as missing dependencies, cycles, tied paths, float exhaustion and long input chains. CI runs those tests automatically when code changes are pushed.
+Tests are executable examples of expected behaviour. The suite checks ordinary cases and edge cases, such as missing dependencies, cycles, tied paths, float exhaustion, long input chains and CSV import errors. CI runs those tests automatically when code changes are pushed.
 
 ### Block 6 — Competitive context and interview rehearsal (45 minutes)
 
@@ -78,6 +80,8 @@ Ask yourself:
 - Which values are invented assumptions?
 - What would we need from a real project team before calling this useful?
 - When would the prototype's answer be wrong or incomplete?
+
+Optional CSV demo: click “Load sample”, then “Validate & load”. Choose PR-01 and test 14, 15 and 16 days. Explain that this endpoint accepts a documented CSV schema only; it does not read native Primavera XER/XML, and imported data is not treated as validated project truth.
 
 ## The pitch to practise
 

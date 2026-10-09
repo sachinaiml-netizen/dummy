@@ -4,7 +4,7 @@
 
 - Mission start: 2026-10-09 19:15 IST (Asia/Kolkata)
 - Mission deadline: 2026-10-10 19:15 IST (Asia/Kolkata)
-- Current iteration: 5
+- Current iteration: 6
 - Time discipline: work occurs only when the user sends a new IMPROVE or FINALIZE message; no background execution is implied.
 - Source of truth at iteration start: main at commit 9e0f0b5a78e93ddf0e566b89517056530c6d0e2b.
 
@@ -109,3 +109,15 @@ This log is itself part of iteration 1. Append timestamped entries rather than r
 - Product decision: keep Float-Burn Watch as the focused feature. Its defensible hypothesis is a very short, inspectable threshold explanation (14/15/16-day procurement delay), not replacing a commercial scheduler.
 - Implemented: added `docs/INTERVIEW_ONE_PAGE.md`, with the 45-second problem statement, synthetic example, frontend/backend data flow, file map, CPM definitions, value formula, competitive honesty, AI-assisted development disclosure, limitations and likely interview questions. README now links to this one-page guide first.
 - Validation: documentation-only change; CI should pass before merge. No application code or live deployment changes are required for this iteration. The live preview remains manually deployed and is not GitHub-linked.
+
+
+## Iteration 6 — configurable CSV schedule intake
+
+- Trigger: user sent IMPROVE after the interview-clarity iteration. Mission clock began 2026-10-09 19:15 IST and ends 2026-10-10 19:15 IST; approximately 20 hours 45 minutes remained when this iteration began.
+- Source-of-truth audit: main at start was `f4f885aa7a0ecdca6256db2b6672635b5894f54f`, with passing main CI. Current main already includes the new CSV UI/API edits from this cycle's first write attempt, but the sample file and CSV regression tests are not yet merged. This iteration uses a new finishing branch based on current main and must not treat the feature as complete until the missing assets/tests/documents are merged and CI passes.
+- Official research: Oracle Primavera Cloud documents importing/exporting P6 projects using P6 XML/XER rather than this prototype's CSV schema: https://primavera.oraclecloud.com/help/en/user/95912.htm and https://primavera.oraclecloud.com/help/en/user/191098.htm. GAO's Schedule Assessment Guide emphasizes well-constructed, logically linked schedules: https://www.gao.gov/products/gao-16-89g.
+- Five ranked opportunities: (1) complete and test the CSV schedule intake so the app can analyse a configurable task network (selected); (2) verify live browser interactions including POST; (3) fix repository branding and automatic GitHub deployment (connection remains blocked); (4) add schedule-data provenance and clearer warnings; (5) improve accessibility and front-end JavaScript tests.
+- Critical finding: the app was still limited to a hard-coded eight-activity network. This weakened the claim that the workflow could be used to test a different task network. At the same time, pretending to import P6 exchange files would be misleading.
+- Implemented in the feature branch: bounded generic CSV adapter with required/optional columns; validation for missing/duplicate headers, row fields, unique IDs, duration values, predecessor references and dependency cycles; optional activity-delay scenario using the same CPM engine; a downloadable synthetic CSV sample; a dashboard flow for selecting a local CSV, validating it, selecting an activity and running a delay; tests for threshold behaviour and malformed CSVs; docs explaining API, input format, data provenance and the explicit lack of native P6 XER/XML support.
+- Design simplification: use Python's standard-library CSV parser and the existing CPM engine. No new runtime package, machine-learning model, database or live integration was added.
+- Verification pending: branch CI must pass. The dashboard currently points to the new API; the feature is not release-ready until the sample route and all tests pass and the post-merge Vercel deployment is checked.

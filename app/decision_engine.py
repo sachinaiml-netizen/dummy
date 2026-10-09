@@ -604,6 +604,8 @@ def analyze_schedule_csv(
                 continue
 
             def field(key: str) -> str:
+                if key not in header_map:
+                    return ""
                 value = row.get(header_map[key])
                 if value is None:
                     return ""
@@ -726,7 +728,7 @@ def analyze_schedule_csv(
 
     return {
         "analysis_type": "generic_csv_schedule",
-        "is_synthetic_demo": True,
+        "data_origin": "user_supplied_csv",
         "activity_count": len(parsed_tasks),
         "disrupted_task_id": disrupted_task_id,
         "delay_days": delay_days,
@@ -746,6 +748,7 @@ def analyze_schedule_csv(
         "critical_paths_truncated": baseline["critical_paths_truncated"] or scenario["critical_paths_truncated"],
         "activities": activities,
         "key_insight": key_insight,
+        "validation_scope": "Task IDs, positive durations, predecessor references, duplicate IDs and dependency cycles were checked. Calendars, lags, resources, contracts and site conditions were not evaluated.",
         "format_note": (
             "Accepted format: task_id, task_name, duration_days, predecessors. "
             "Use | between predecessor IDs. Optional columns: owner, stream. "

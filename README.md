@@ -16,10 +16,28 @@ The current feature is called **Float-Burn Watch**: it demonstrates how an activ
 - **Health API:** https://project-impact-lab.vercel.app/health
 - **Default scenario API:** https://project-impact-lab.vercel.app/api/scenario
 - **Synthetic task catalog:** https://project-impact-lab.vercel.app/api/catalog
+- **CSV sample template:** https://project-impact-lab.vercel.app/sample-schedule.csv
+- **CSV analysis endpoint:** `POST https://project-impact-lab.vercel.app/api/schedule/analyze-csv`
 
 The public URL and the three GET routes were checked after deployment on 2026-10-09. The default scenario response returns baseline handover Day 119, no-action handover Day 133, and the explicitly illustrative structural recovery option. Automated CI separately tests the POST scenario route and its validation.
 
 **Deployment limitation:** the Vercel deployment is currently a manual source upload. The connected Vercel account did not have a GitHub Login Connection, so Vercel is not linked to this repository and future pushes to main will not automatically deploy. Re-deploy the latest main source or establish the GitHub connection in Vercel before relying on automatic releases. No database, custom domain, secret, or paid add-on was configured; the connected account's full billing/plan status was not readable through the available connection.
+
+## CSV schedule intake
+
+The app accepts a small, documented CSV adapter format so a user can inspect a task network other than the built-in example. Download [the synthetic sample CSV](https://project-impact-lab.vercel.app/sample-schedule.csv) and upload it in the dashboard, or submit the same text to `POST /api/schedule/analyze-csv` as JSON:
+
+```json
+{
+  "csv_text": "task_id,task_name,duration_days,predecessors\\nA,Approval,4,\\nB,Structure,8,A\\nC,Handover,2,B\\n",
+  "disrupted_task_id": "B",
+  "delay_days": 3
+}
+```
+
+Required columns: `task_id`, `task_name`, `duration_days`, and `predecessors`. Optional columns: `owner` and `stream`. Multiple predecessor IDs are separated with `|`, for example `A-01|B-02`. Current limits are 250,000 characters, 2,000 activities, task IDs up to 80 characters, and scenario delays from 0 to 60 whole days. Empty rows are ignored; duplicate headers/IDs, missing columns, invalid durations, missing predecessor IDs, cycles, and a disruption ID absent from the CSV are rejected.
+
+This is **not** a native Primavera P6 XER/XML parser or live integration. Oracle documents P6 XML/XER as its exchange formats; this prototype needs a mapped CSV export in its own schema. The API checks graph structure but does not validate working calendars, actuals, lags, resources, contract terms or site conditions. Use synthetic or non-confidential data. The app does not save imported schedules in an application database, but this is not a certified secure data-ingestion service.
 
 ## Why this is a more useful interview demonstration
 
@@ -40,6 +58,7 @@ These are deterministic examples built from made-up durations, dependencies, act
 - Ranking by days recovered, action cost and modelled net value.
 - A 3×3 deterministic assumption stress grid showing whether the preferred action remains stable when delay and daily-exposure assumptions change.
 - One-click demo presets for the 14/15/16-day float threshold and a structural recovery comparison, so the interview demo does not rely on manual slider positioning.
+- CSV schedule intake with server-side checks for required columns, duplicate IDs, durations, predecessor references and dependency cycles; accepted CSV schedules can be tested with a delay and inspected for float/critical-path changes.
 - Pydantic input validation and tests for critical-path impact, schedule float, tied paths, non-topological input order, cycles, unknown predecessors, invalid durations and bounded critical-path output.
 - Legacy /risk endpoint retained with a transparent rule-based snapshot score and bounded deviation indicator; it does not claim to run an ML anomaly detector.
 
@@ -92,6 +111,8 @@ Open http://127.0.0.1:8000 for the dashboard and http://127.0.0.1:8000/docs for 
 |---|---|---|
 | GET | /health | Health check |
 | GET | /api/catalog | Synthetic task and intervention catalog |
+| GET | /sample-schedule.csv | Download the synthetic CSV adapter example |
+| POST | /api/schedule/analyze-csv | Validate a CSV network and compute baseline / one-delay CPM output |
 | GET | /api/scenario | Default structural-delay scenario |
 | POST | /api/scenario | Recompute impact for a supplied scenario |
 | POST | /risk | Legacy telemetry-based risk-score prototype |
