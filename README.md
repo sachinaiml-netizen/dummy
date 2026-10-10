@@ -144,6 +144,8 @@ This matches the core CPM concepts documented by Oracle Primavera Cloud, which d
 
 ## Experimental synthetic risk model
 
+Full methodology, synthetic metrics, limits and the path to real-data validation: [Synthetic Risk Model guide](docs/SYNTHETIC_RISK_MODEL.md).
+
 The /risk-model endpoint is a trained logistic-regression implementation, but its supervision is synthetic. It was fitted to 70,000 generated rows, selected against 15,000 validation rows, evaluated on a separate 15,000-row synthetic holdout, and stress-checked on a further 15,000 rows generated under deliberately shifted assumptions. The repository includes the deterministic generator and the versioned fitted coefficients. No third-party machine-learning dependency is required at runtime.
 
 To reproduce the fitted model and verify that the committed artifact is consistent:
