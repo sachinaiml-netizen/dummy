@@ -24,10 +24,10 @@ jobs:
           import re
 
           page = Path("static/index.html").read_text(encoding="utf-8")
-          scripts = re.findall(r"<script(?:\\s[^>]*)?>(.*?)</script>", page, flags=re.DOTALL | re.IGNORECASE)
+          scripts = re.findall(r"<script(?:\s[^>]*)?>(.*?)</script>", page, flags=re.DOTALL | re.IGNORECASE)
           if not scripts:
               raise SystemExit("No inline JavaScript found in static/index.html")
-          Path("/tmp/project-impact-lab-dashboard.js").write_text("\\n".join(scripts), encoding="utf-8")
+          Path("/tmp/project-impact-lab-dashboard.js").write_text("\n".join(scripts), encoding="utf-8")
           PY
           node --check /tmp/project-impact-lab-dashboard.js
       - name: Test decision brief output with a valid schedule result
