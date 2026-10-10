@@ -130,7 +130,7 @@ def test_dashboard_exposes_csv_workflow_and_accurate_format_caveat():
     assert "does not parse native Primavera P6 XER/XML files" in page
     assert "No schedule is saved by this application" in page
     assert "CSV contents are sent to this app's API for validation and calculation" in page
-    assert "not a confidentiality guarantee" in page
+    assert "or a confidentiality guarantee" in page
 
 
 def test_decision_brief_export_is_visible_and_carries_model_limits():
