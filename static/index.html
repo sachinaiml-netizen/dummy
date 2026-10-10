@@ -39,6 +39,21 @@
 
 @media(max-width:1050px){.hero{grid-template-columns:1fr}.problem-brief{grid-template-columns:1fr}.layout{grid-template-columns:1fr}.analysisgrid{grid-template-columns:1fr}.hero-copy h2{font-size:30px}}
 @media(max-width:680px){.wrap{padding:16px 12px 28px}.top{align-items:flex-start;flex-direction:column}.brand h1{font-size:21px}.kpis{grid-template-columns:1fr 1fr}.kpi .value{font-size:24px}.hero-copy,.thesis{padding:17px}.panelbody{padding:13px}.footgrid{grid-template-columns:1fr}.analysisgrid{gap:12px}}
+
+.riskformgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.riskformgrid label{display:block;font-size:10px;font-weight:800;color:#bac8d6;margin-bottom:6px}
+.riskformgrid .riskfield{border:1px solid #293b4e;background:#0d1721;border-radius:9px;padding:10px}
+.riskformgrid input{width:100%;background:#0a131d;color:var(--ink);border:1px solid #2b4054;border-radius:7px;padding:9px;font:inherit;font-size:12px}
+.riskformgrid input:focus{border-color:var(--lime);outline:none}
+.riskmodelgrid{display:grid;grid-template-columns:190px minmax(0,1fr);gap:14px;margin-top:14px}
+.riskmodelscore{border:1px solid #34475a;background:#0b141e;border-radius:11px;padding:15px}
+.riskmodelscore .score{font-size:32px;font-weight:900;letter-spacing:-.05em;color:var(--lime)}
+.riskmodelstatus{font-size:10px;line-height:1.6;color:var(--muted);margin-top:6px}
+.riskdriverlist{margin:0;padding-left:16px;color:#c5d1de;font-size:11px}
+.riskdriverlist li{margin:7px 0}
+.riskwarning{border:1px solid #755533;background:#241e17;color:#f2c58e;border-radius:9px;padding:11px;font-size:10px;line-height:1.6;margin-top:12px}
+@media(max-width:850px){.riskmodelgrid{grid-template-columns:1fr}.riskformgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.riskformgrid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -201,6 +216,30 @@
   <section class="footgrid">
     <div class="panel"><div class="panelhead"><h3>How this could fit a real project stack</h3><span class="index">05 / ARCHITECTURE</span></div><div class="panelbody"><ol class="listclean"><li><strong style="color:#e4edf5">Ingest (future adapter):</strong> milestone dates and activity links from an approved schedule export; issue and procurement status from allowed data sources.</li><li><strong style="color:#e4edf5">Normalize:</strong> align IDs, calendars, owners, status timestamps and dependencies; quarantine stale or incomplete records.</li><li><strong style="color:#e4edf5">Simulate:</strong> propagate a disruption through the dependency graph and compare the original plan against plausible interventions.</li><li><strong style="color:#e4edf5">Explain:</strong> show the critical chain, affected successors, estimated recovery, assumed cost and reasons behind the ranking.</li><li><strong style="color:#e4edf5">Govern:</strong> project owner reviews the evidence and action. Log assumptions, version and approval; never auto-approve construction or regulatory decisions.</li></ol></div></div>
     <div class="panel"><div class="panelhead"><h3>Model card & guardrails</h3><span class="index">06 / TRUST</span></div><div class="panelbody"><ul class="listclean"><li><strong style="color:#e4edf5">Method:</strong> deterministic dependency graph + longest-path schedule propagation; scenario search across a small set of illustrative recovery actions.</li><li><strong style="color:#e4edf5">Not claimed:</strong> no learned delay probability, no causal proof, no Autodesk / Primavera connection and no access to Prestige data.</li><li><strong style="color:#e4edf5">Needed for validation:</strong> approved activity histories, working calendars, resource constraints, intervention cost ranges and actual planned/actual completion outcomes.</li><li><strong style="color:#e4edf5">Before a pilot:</strong> test against historic projects, report error and sensitivity, review false alerts, verify security / access control, and retain human sign-off.</li></ul></div></div>
+  </section>
+  <div style="height:16px"></div>
+  <section class="panel" id="riskProofPanel" aria-labelledby="riskProofTitle">
+    <div class="panelhead"><h3 id="riskProofTitle">Future-risk proof model</h3><span class="index">08 / ML BASELINE</span></div>
+    <div class="panelbody">
+      <p class="csvintro">A small logistic-regression model trained on 60,000 generated examples. Enter a current telemetry snapshot to see a score and which inputs influenced it. This is a model-pipeline demonstration—not a calibrated prediction for a real project.</p>
+      <div class="riskformgrid" style="margin-top:14px">
+        <div class="riskfield"><label for="riskPlanned">Planned progress (%)</label><input id="riskPlanned" type="number" min="0" max="100" step="0.1" value="80"></div>
+        <div class="riskfield"><label for="riskActual">Actual progress (%)</label><input id="riskActual" type="number" min="0" max="100" step="0.1" value="58"></div>
+        <div class="riskfield"><label for="riskBudget">Budget variance (%)</label><input id="riskBudget" type="number" min="-100" max="500" step="0.1" value="9"></div>
+        <div class="riskfield"><label for="riskVendor">Vendor delay (days)</label><input id="riskVendor" type="number" min="0" max="365" step="1" value="10"></div>
+        <div class="riskfield"><label for="riskIssues">Open issues</label><input id="riskIssues" type="number" min="0" max="10000" step="1" value="12"></div>
+        <div class="riskfield"><label for="riskDefects">Quality defects</label><input id="riskDefects" type="number" min="0" max="10000" step="1" value="5"></div>
+      </div>
+      <div style="margin-top:12px"><button id="runRiskModelButton" class="btn btn-primary" type="button">Score snapshot with proof model →</button></div>
+      <div id="riskModelStatus" class="csvstatus" role="status" aria-live="polite">Model loads with the app. Run a score to inspect the model response.</div>
+      <div id="riskModelResult" hidden>
+        <div class="riskmodelgrid">
+          <div class="riskmodelscore"><div class="statlabel">Synthetic model score</div><div id="riskModelScore" class="score">—</div><div id="riskModelBand" class="badge">—</div><div id="riskModelVersion" class="riskmodelstatus"></div></div>
+          <div class="csvbox"><div class="smalltitle">Largest model contributions</div><ol id="riskModelDrivers" class="riskdriverlist"></ol><div id="riskModelMetrics" class="riskmodelstatus"></div></div>
+        </div>
+        <div id="riskModelWarning" class="riskwarning"></div>
+      </div>
+    </div>
   </section>
   <footer class="footer"><span>PROJECT IMPACT LAB · Student proof of concept · Synthetic data</span><span>Concept: a decision-rehearsal layer above existing systems, not a replacement</span></footer>
 </div>
@@ -558,6 +597,55 @@ runCsvScenarioButton.addEventListener('click',function(){
   if(!selected){setCsvStatus('Select an activity to delay.','error');return;}
   if(!Number.isInteger(delay)||delay<0||delay>60){setCsvStatus('Delay must be a whole number between 0 and 60.','error');return;}
   submitCsvAnalysis(selected,delay);
+});
+
+
+document.getElementById('runRiskModelButton').addEventListener('click', async function(){
+  var button=document.getElementById('runRiskModelButton');
+  var status=document.getElementById('riskModelStatus');
+  button.disabled=true;
+  status.textContent='Scoring the telemetry snapshot…';
+  status.className='csvstatus';
+  try{
+    var payload={
+      project_id:'DEMO-SNAPSHOT',
+      planned_progress:Number(document.getElementById('riskPlanned').value),
+      actual_progress:Number(document.getElementById('riskActual').value),
+      budget_variance_pct:Number(document.getElementById('riskBudget').value),
+      vendor_delay_days:Number(document.getElementById('riskVendor').value),
+      open_issues:Number(document.getElementById('riskIssues').value),
+      quality_defects:Number(document.getElementById('riskDefects').value)
+    };
+    var response=await fetch('/api/risk/proof-model',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    var body=await response.json();
+    if(!response.ok){
+      var detail=body.detail;
+      if(Array.isArray(detail)) detail=detail.map(function(item){return item.loc.join('.')+': '+item.msg;}).join('; ');
+      throw new Error(detail || 'Risk model request failed.');
+    }
+    document.getElementById('riskModelResult').hidden=false;
+    document.getElementById('riskModelScore').textContent=body.score_pct.toFixed(1)+'%';
+    document.getElementById('riskModelBand').textContent=body.risk_band+' · demo band';
+    document.getElementById('riskModelVersion').textContent=body.model_version+' · '+body.training_rows.toLocaleString()+' training rows';
+    var list=document.getElementById('riskModelDrivers');
+    list.innerHTML='';
+    body.top_drivers.forEach(function(driver){
+      var item=document.createElement('li');
+      item.textContent=driver.label+': '+driver.raw_value+' (contribution '+(driver.logit_contribution>0?'+':'')+driver.logit_contribution+') — '+driver.direction;
+      list.appendChild(item);
+    });
+    var m=body.test_metrics;
+    document.getElementById('riskModelMetrics').textContent='Same-generator test only: ROC-AUC '+m.roc_auc+' · accuracy '+m.accuracy+' · recall '+m.recall+' · Brier '+m.brier_score+'. These do not measure real-world performance.';
+    document.getElementById('riskModelWarning').textContent=body.important_warning;
+    status.textContent='Score calculated. Read the model limitations before interpreting it.';
+    status.className='csvstatus success';
+  }catch(error){
+    document.getElementById('riskModelResult').hidden=true;
+    status.textContent=error.message;
+    status.className='csvstatus error';
+  }finally{
+    button.disabled=false;
+  }
 });
 
 loadCatalog().then(recalculate).catch(function(error){setError(error.message+' Start the API with: uvicorn app.main:app --reload');});
