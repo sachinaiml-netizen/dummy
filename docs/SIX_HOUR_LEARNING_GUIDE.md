@@ -99,7 +99,7 @@ Optional CSV demo: click “Load sample”, then “Validate & load”. Choose P
 ## Questions you should be able to answer
 
 **“Where is the AI?”**  
-“This version's core scheduling is deterministic CPM, not trained AI. I used AI-assisted coding to build the prototype. To justify a predictive model, we would need approved historical schedule data and evidence that ML improves over a transparent baseline.”
+“The handover calculation is deterministic CPM. I also trained a separate experimental logistic-regression model on 70,000 synthetic examples with separate validation and test data. That proves the training and serving pipeline works; it does not prove real-world delay prediction. For that, we need approved historical snapshots, verified future outcomes, project/time-separated testing, calibration and evidence that ML beats a transparent baseline.”
 
 **“Isn't this already in Primavera?”**  
 “Primavera already supports CPM, total float and multiple float paths. I am not claiming to replace it. The hypothesis is that a small, explicit delay-to-action explanation may be useful in a particular workflow. We would need to compare it with the team's current tools to find out.”
@@ -144,8 +144,8 @@ Close the README and answer these aloud without reading. You are ready to demons
 5. **What does the CSV intake accept—and reject?**  
    A generic CSV with `task_id, task_name, duration_days, predecessors`; optional `owner, stream`. It rejects duplicate IDs, invalid durations, unknown predecessor references and cycles. It does not parse native P6 XER/XML.
 
-6. **Is the schedule engine AI?**  
-   No. It is deterministic CPM. AI-assisted tools helped with development; do not claim a trained prediction model exists.
+6. **Which part is trained ML?**  
+   The core CPM engine is deterministic. The separate /risk-model is trained logistic regression using 70,000 synthetic labels; it is not validated for real construction outcomes. Explain the synthetic target and why its metrics do not generalize automatically.
 
 7. **Where did the schedule and cost data come from?**  
    They are synthetic assumptions created for the demo. No Prestige internal data or live system is connected.
