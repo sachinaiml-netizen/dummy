@@ -176,3 +176,11 @@ This log is itself part of iteration 1. Append timestamped entries rather than r
 - CI setup: Node 20, pinned Playwright package, Chromium installation, a 15-minute job timeout, and the existing dashboard syntax / decision-brief / Python tests remain in place.
 - Test scope: this is an automated browser test of the same app code launched locally inside GitHub Actions. It is stronger than a DOM-string test but is not a manual click-through against the public deployment. Production GET routes were checked separately; public browser automation remains blocked by the connected automation wallet having a negative balance.
 - Release gate: verify Playwright/Chromium installation and the browser workflow on the branch CI; merge only if the complete workflow passes. No runtime feature change is intended by this test-only iteration.
+
+
+## Iteration 12 — invalid CSV upload must invalidate prior output
+
+- Review finding: browser E2E now proves a valid uploaded schedule can be analysed and exported, plus CSV names are escaped safely. The remaining UI failure path worth guarding is a user who first gets a valid result, then selects a malformed schedule with a missing predecessor.
+- Change under review: extend the same real-browser flow with a CSV referencing a missing predecessor. Assert the UI displays an explicit validation error, hides the prior analysis, disables scenario execution, and hides the decision-brief download control so an old result cannot be mistaken for the failed upload.
+- This is a test-first validation iteration; no product runtime code changes are intended unless the test exposes a defect.
+- Release gate: wait for CI's browser workflow plus the full Python regression suite. If the invalid-upload state does not meet these assertions, fix the UI state-handling code before merging.
