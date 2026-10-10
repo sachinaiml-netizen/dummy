@@ -5,11 +5,12 @@ from fastapi.responses import FileResponse
 
 from .decision_engine import analyze_schedule_csv, get_catalog, simulate_project
 from .risk import assess_risk
-from .schemas import CsvScheduleRequest, ProjectTelemetry, RiskResponse, ScenarioRequest
+from .risk_model import predict_delay_risk, risk_model_info
+from .schemas import (CsvScheduleRequest, DelayRiskRequest, DelayRiskResponse, ProjectTelemetry, RiskResponse, ScenarioRequest)
 
 app = FastAPI(
     title="Project Impact Lab",
-    version="2.0.0",
+    version="2.1.0",
     description=(
         "A synthetic-data proof of concept for critical-path-aware scenario analysis "
         "and explainable construction recovery decisions."
@@ -82,3 +83,16 @@ def analyze_csv_schedule(request: CsvScheduleRequest):
 def risk(project: ProjectTelemetry) -> RiskResponse:
     result = assess_risk(project)
     return RiskResponse(project_id=project.project_id, **result)
+
+
+
+@app.get("/api/risk/model-info")
+def delay_risk_model_info():
+    """Return training provenance and holdout metrics for the experimental model."""
+    return risk_model_info()
+
+
+@app.post("/api/risk/predict", response_model=DelayRiskResponse)
+def delay_risk_prediction(request: DelayRiskRequest) -> DelayRiskResponse:
+    """Generate an experimental risk score; synthetic-only outputs are clearly flagged."""
+    return DelayRiskResponse(**predict_delay_risk(request.model_dump()))
