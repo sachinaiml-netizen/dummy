@@ -1,0 +1,99 @@
+{
+  "model_version": "synthetic-logistic-v1",
+  "model_type": "standardized logistic regression",
+  "training_data_kind": "synthetic",
+  "synthetic_generator_version": "construction-risk-generator-v1",
+  "target_column": "target_high_risk_30d",
+  "target_definition": "Synthetic indicator sampled from an invented risk generator; it is not observed construction outcome data.",
+  "feature_schema": [
+    {
+      "key": "planned_progress_pct",
+      "label": "Planned progress (%)"
+    },
+    {
+      "key": "schedule_gap_pp",
+      "label": "Schedule gap (percentage points)"
+    },
+    {
+      "key": "positive_budget_variance_pct",
+      "label": "Positive budget variance (%)"
+    },
+    {
+      "key": "vendor_delay_days",
+      "label": "Vendor delay (days)"
+    },
+    {
+      "key": "open_issues",
+      "label": "Unresolved issues"
+    },
+    {
+      "key": "quality_defects",
+      "label": "Quality defects"
+    }
+  ],
+  "coefficients": [
+    0.17622472049334495,
+    0.7889478428801904,
+    0.2545722661961515,
+    0.6042875529614565,
+    0.39392643721567094,
+    0.22159488612982392
+  ],
+  "intercept": -0.5165567230392842,
+  "means": [
+    52.55503025030069,
+    7.216254479622515,
+    4.163017592322396,
+    7.978095238095238,
+    4.448309523809524,
+    1.670452380952381
+  ],
+  "scales": [
+    27.41797447625491,
+    6.924805923346404,
+    4.893329378639503,
+    7.878421173142922,
+    3.4662721157440437,
+    1.6784752959637803
+  ],
+  "training_metadata": {
+    "seed": 20261010,
+    "total_rows": 60000,
+    "train_rows": 42000,
+    "validation_rows": 9000,
+    "test_rows": 9000,
+    "dropped_rows_for_embargo": 0,
+    "split_strategy": "deterministic shuffled 70/15/15 split; independent generated records",
+    "selected_epoch": 214,
+    "validation_log_loss": 0.52662,
+    "threshold_pct": {
+      "low_below": 35,
+      "medium_below": 65,
+      "high_at_or_above": 65
+    },
+    "warning": "Held-out metrics measure recovery of synthetic labels from the same generator only. They do not estimate performance on Prestige or real construction data."
+  },
+  "test_metrics": {
+    "test_rows": 9000,
+    "accuracy": 0.7402,
+    "precision": 0.7073,
+    "recall": 0.5658,
+    "f1": 0.6287,
+    "roc_auc": 0.7961,
+    "brier_score": 0.1744,
+    "actual_positive_rate": 0.3887,
+    "majority_baseline_accuracy": 0.6113,
+    "confusion_matrix": {
+      "true_positive": 1979,
+      "false_positive": 819,
+      "true_negative": 4683,
+      "false_negative": 1519
+    }
+  },
+  "limitations": [
+    "No Prestige or other real construction outcomes were used.",
+    "Scores are not calibrated probabilities for actual project delay, cost overrun, or quality events.",
+    "The synthetic label generator is an invented proxy and may encode unrealistic feature relationships.",
+    "Real deployment requires an agreed target outcome, labeled historical snapshots, chronological holdout, calibration, subgroup evaluation and human review."
+  ]
+}
