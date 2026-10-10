@@ -21,7 +21,7 @@ class RiskResponse(BaseModel):
 
 
 class ScenarioRequest(BaseModel):
-    disrupted_activity_id: str = Field(default="ST-01", min_length=1, max_length=20)
+    disrupted_activity_id: str = Field(default="PR-01", min_length=1, max_length=20)
     delay_days: int = Field(default=14, ge=0, le=60)
     exposure_lakh_per_day: float = Field(default=4.5, ge=0, le=100)
 
