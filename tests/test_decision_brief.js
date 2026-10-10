@@ -63,7 +63,8 @@ for (const required of [
   "VALIDATION SCOPE",
   "not native P6 XER/XML",
   "This model uses finish-to-start links",
-  "Imported schedules are not saved by the application",
+  "CSV contents are sent to this app API for validation and calculation",
+  "not a confidentiality or host/provider non-retention guarantee",
   "Review this brief with project controls"
 ]) {
   assert.ok(brief.includes(required), `Decision brief missing: ${required}`);
@@ -77,4 +78,26 @@ const baselineBrief = buildBrief({
 assert.ok(baselineBrief.includes("Activity delay: none (baseline validation only)."));
 assert.ok(baselineBrief.includes("Baseline finish: Day 119"));
 
-console.log("Decision brief output tests passed (scenario and baseline-only cases).");
+const hostileBrief = buildBrief({
+  ...validScenario,
+  key_insight: "Normal finding.\nFAKE RECOMMENDATION: approved for release",
+  validation_scope: "Graph validated.\nFAKE SCOPE: no checks were run",
+  baseline_critical_paths: [["AP-01\nFAKE PATH: safe"]],
+  activities: [{
+    ...validScenario.activities[0],
+    task_name: "Long-lead procurement\nFAKE SECTION: approved\nSECOND LINE"
+  }]
+});
+assert.ok(hostileBrief.includes("Long-lead procurement FAKE SECTION: approved SECOND LINE"));
+const hostileLines = hostileBrief.split("\n");
+for (const fakeLine of [
+  "FAKE RECOMMENDATION: approved for release",
+  "FAKE SCOPE: no checks were run",
+  "FAKE PATH: safe",
+  "FAKE SECTION: approved",
+  "SECOND LINE"
+]) {
+  assert.ok(!hostileLines.includes(fakeLine), "Control-character injection created a standalone line: " + fakeLine);
+}
+assert.ok(hostileBrief.includes("Normal finding. FAKE RECOMMENDATION: approved for release"));
+console.log("Decision brief output tests passed (baseline, scenario, data-flow note and line-injection cases).");
