@@ -7,6 +7,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -23,12 +24,18 @@ jobs:
           import re
 
           page = Path("static/index.html").read_text(encoding="utf-8")
-          scripts = re.findall(r"<script(?:\s[^>]*)?>(.*?)</script>", page, flags=re.DOTALL | re.IGNORECASE)
+          scripts = re.findall(r"<script(?:\\s[^>]*)?>(.*?)</script>", page, flags=re.DOTALL | re.IGNORECASE)
           if not scripts:
               raise SystemExit("No inline JavaScript found in static/index.html")
-          Path("/tmp/project-impact-lab-dashboard.js").write_text("\n".join(scripts), encoding="utf-8")
+          Path("/tmp/project-impact-lab-dashboard.js").write_text("\\n".join(scripts), encoding="utf-8")
           PY
           node --check /tmp/project-impact-lab-dashboard.js
       - name: Test decision brief output with a valid schedule result
         run: node tests/test_decision_brief.js
+      - name: Install Playwright and Chromium
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Test browser schedule upload and decision-brief download
+        run: node tests/test_browser_workflow.cjs
       - run: python -m pytest -q
