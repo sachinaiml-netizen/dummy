@@ -34,6 +34,12 @@ The deviation index normalizes each signal against an illustrative reference ran
 
 This rule-based design is intentional: fitting an Isolation Forest to synthetic samples creates no evidence of real-world anomaly detection and adds substantial runtime dependencies without strengthening the project's primary schedule-decision demonstration.
 
-## 4. Production evolution
+## 4. Experimental synthetic risk classifier
 
-A real pilot should use approved historic project snapshots and schedules. Calibrate any scoring thresholds with domain experts, evaluate against held-out time periods, compare against a simple baseline, and report false-positive/false-negative behaviour before presenting any model as validated. Preserve feature provenance, thresholds, model/version metadata and human review records.
+A separate POST /risk-model endpoint loads a versioned logistic-regression artifact from static/synthetic_risk_model.json. scripts/train_synthetic_risk_model.py reproducibly generates 115,000 rows: 70,000 training; 15,000 validation; 15,000 same-generator test; and 15,000 shifted synthetic stress-test rows. The artifact is checked in CI with the --check flag. The current features are schedule gap, positive budget variance, vendor delay days, open issues and quality defects.
+
+This is a trained model, but its target is a simulated label, not a verified construction outcome. Its metrics do not validate generalisation to Prestige or another real developer. POST /risk remains the separate rule-based legacy endpoint. See SYNTHETIC_RISK_MODEL.md for the model card and the real-data validation plan.
+
+## 5. Production evolution
+
+A real pilot should use approved historic project snapshots and schedules with well-defined future outcome labels. Split by whole project and later time periods to avoid leakage, calibrate thresholds with project-controls experts, compare against simple baselines, and report calibration, false-positive/false-negative behaviour and drift. Preserve feature provenance, thresholds, model/version metadata and human review records.
