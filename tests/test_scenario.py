@@ -216,14 +216,31 @@ def test_procurement_delay_exhausting_float_exposes_tied_critical_paths():
     assert activities["ME-01"]["shocked_total_float_days"] == 0
 
 
-def test_api_returns_total_float_and_critical_path_count():
+def test_api_default_scenario_matches_the_float_burn_problem_statement():
     response = client.get("/api/scenario")
     assert response.status_code == 200
     data = response.json()
-    assert data["baseline_critical_path_count"] == 1
+    assert data["disrupted_activity_id"] == "PR-01"
+    assert data["delay_days"] == 14
+    assert data["baseline_finish_day"] == 119
+    assert data["shocked_finish_day"] == 119
+    assert data["shocked_slip_days"] == 0
+    assert data["disrupted_activity_baseline_total_float_days"] == 15
+    assert data["disrupted_activity_scenario_total_float_days"] == 1
+    assert data["disrupted_activity_float_consumed_days"] == 14
+    assert data["recommended_action"]["id"] == "none"
     procurement = next(item for item in data["activities"] if item["id"] == "PR-01")
     assert procurement["baseline_total_float_days"] == 15
-    assert procurement["shocked_total_float_days"] == 29  # structural delay moves the modeled project finish
+    assert procurement["shocked_total_float_days"] == 1
+
+
+def test_dashboard_defaults_to_the_same_procurement_threshold_scenario():
+    response = client.get("/")
+    assert response.status_code == 200
+    page = response.text
+    assert "activitySelect.value = catalog.activities.some(function(task){return task.id==='PR-01';})" in page
+    assert 'id="float14Case"' in page
+    assert "Procurement has 15 days" not in page  # copy uses lower-case 'procurement'; no case-sensitive mismatch
 
 
 
