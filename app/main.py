@@ -5,7 +5,8 @@ from fastapi.responses import FileResponse
 
 from .decision_engine import analyze_schedule_csv, get_catalog, simulate_project
 from .risk import assess_risk
-from .schemas import CsvScheduleRequest, ProjectTelemetry, RiskResponse, ScenarioRequest
+from .risk_model import score_project
+from .schemas import CsvScheduleRequest, ProjectTelemetry, RiskResponse, RiskProofResponse, ScenarioRequest
 
 app = FastAPI(
     title="Project Impact Lab",
@@ -82,3 +83,9 @@ def analyze_csv_schedule(request: CsvScheduleRequest):
 def risk(project: ProjectTelemetry) -> RiskResponse:
     result = assess_risk(project)
     return RiskResponse(project_id=project.project_id, **result)
+
+
+@app.post("/api/risk/proof-model", response_model=RiskProofResponse)
+def risk_proof_model(project: ProjectTelemetry) -> RiskProofResponse:
+    """Score one telemetry snapshot with the synthetic-trained research model."""
+    return RiskProofResponse(**score_project(project))
