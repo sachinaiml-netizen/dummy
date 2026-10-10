@@ -459,7 +459,13 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
             "Deployment requires independent chronological validation, calibration, subgroup checks and human review.",
         ],
     }
-    output_path = Path(args.output)
+    output_path = Path(args.output).resolve()
+    serving_artifact = (Path(__file__).resolve().parents[1] / "app" / "risk_model.json").resolve()
+    if args.input_csv and output_path == serving_artifact:
+        raise ValueError(
+            "Refusing to overwrite the active proof-model artifact with a real-data candidate. "
+            "Write to a separate path, review metrics and approvals, then promote explicitly."
+        )
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(json.dumps(artifact, indent=2, sort_keys=False) + "\n", encoding="utf-8")
     return artifact
