@@ -157,8 +157,17 @@ async function main() {
     assert.equal(await page.locator("#runCsvScenarioButton").isDisabled(), true, "Invalid schedule must not be available for scenario runs");
     assert.equal(await page.locator("#downloadCsvBriefButton").isVisible(), false, "Invalid schedule must not allow export of a stale decision brief");
 
+    // Exercise the synthetic-trained risk model form and visible validity warning.
+    await page.locator("#runRiskModelButton").click();
+    await page.waitForFunction(() =>
+      document.querySelector("#riskModelResult") &&
+      !document.querySelector("#riskModelResult").hidden &&
+      document.querySelector("#riskModelWarning")?.textContent.includes("PROOF MODEL ONLY")
+    );
+    assert.ok((await page.locator("#riskModelScore").textContent()).includes("%"));
+    assert.ok((await page.locator("#riskModelMetrics").textContent()).includes("ROC-AUC"));
     assert.deepEqual(pageErrors, [], "Unexpected browser exceptions: " + pageErrors.join("; "));
-    console.log("Browser E2E passed: threshold boundaries, sample download/upload, CSV analysis, decision-brief download/content, and safe task-name rendering.");
+    console.log("Browser E2E passed: schedule upload, thresholds, report export, safe task labels and risk-model UI.");
   } finally {
     if (browser) await browser.close();
     server.kill("SIGTERM");
