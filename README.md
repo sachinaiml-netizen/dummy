@@ -66,6 +66,8 @@ These are deterministic examples built from made-up durations, dependencies, act
 
 ## Synthetic-trained risk proof model
 
+For the exact historical CSV schema, safe candidate-training command, temporal-split limitations and review checklist, see [Risk Model Training and Real-Data Validation](docs/RISK_MODEL_TRAINING.md).
+
 A separate research baseline now trains a standardized logistic-regression model on **60,000 reproducibly generated synthetic snapshots**. The dataset is split into 42,000 training, 9,000 validation and 9,000 test examples. The checked-in artifact is `app/risk_model.json`; the no-third-party-dependency training script is `scripts/train_risk_model.py`. The browser form sends the current telemetry snapshot to `POST /api/risk/proof-model` and shows the model score plus the largest feature contributions.
 
 Synthetic holdout metrics for the current artifact: ROC-AUC **0.7961**, accuracy **0.7402**, precision **0.7073**, recall **0.5658**, and Brier score **0.1744** at a 0.5 classification threshold. The majority-class accuracy baseline is **0.6113**. These results measure recovery of an invented synthetic label from the same data generator. **They do not estimate accuracy on real construction projects, are not calibrated probabilities for an actual event, and must not be used for project decisions.**
