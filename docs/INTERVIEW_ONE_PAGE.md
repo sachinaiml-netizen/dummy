@@ -77,17 +77,21 @@ The testable idea is narrower: **does one clear 14/15/16-day threshold walkthrou
 
 ## 9. If asked, “Where is the AI?”
 
-“The current schedule calculation is deterministic CPM, not a trained AI model. I used AI as a coding assistant, researched the problem, narrowed the feature, reviewed the logic and tests, and am learning the code paths so I can explain the design and limitations. I would only add predictive ML if approved historical data and testing showed it improved on this transparent baseline.”
+“The main scheduling calculation is deterministic CPM. I also built an experimental logistic-regression classifier trained on 70,000 synthetic examples and evaluated it on separate generated test data. That validates the model pipeline, not real construction prediction: the labels are simulated, and the score is not calibrated to Prestige outcomes. I used AI as a coding assistant, reviewed the logic and tests, and would only use real project predictions after approved historical snapshots, verified outcome labels and leakage-safe validation showed value beyond a transparent baseline.”
 
 Do not claim that you personally typed every line if AI generated or revised code.
 
-## 10. Three honest limitations
+## 10. Separate experimental risk model
+
+The dashboard also includes a separate logistic-regression classifier at /risk-model. It was trained on 70,000 synthetic samples, validated on 15,000, tested on 15,000 same-generator rows, and stress-checked on 15,000 shifted synthetic rows. Held-out ROC AUC is 0.800 and Brier score is 0.141, but these metrics only describe the simulator. Do not claim real-world accuracy or use the score to drive a project decision.
+
+## 11. Three honest limitations
 
 1. The task network and cost assumptions are synthetic.
 2. The engine does not yet model work calendars, lags, resource constraints, site conditions or contract rules.
 3. It is not connected to Prestige's systems or data and does not replace a scheduler.
 
-## 11. Files to open if asked
+## 12. Files to open if asked
 
 1. `docs/PROBLEM_STATEMENT.md` — business problem and example.
 2. `static/index.html` — visible interface and browser-to-API flow.
@@ -96,5 +100,6 @@ Do not claim that you personally typed every line if AI generated or revised cod
 5. `app/decision_engine.py` — scheduling logic and CSV adapter.
 6. `tests/test_scenario.py` and `tests/test_csv_schedule.py` — evidence the expected cases are tested.
 7. `docs/architecture.md` — deeper technical details.
+8. `docs/SYNTHETIC_RISK_MODEL.md` — training split, metrics and real-data validation gate.
 
 **Interview rule:** explain the problem first, show the three thresholds second, explain the data flow third, and state the limitations before making any claim about business value.
