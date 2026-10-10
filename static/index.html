@@ -228,6 +228,11 @@ async function loadCatalog(){
     option.textContent=task.id + ' · ' + task.name;
     activitySelect.appendChild(option);
   });
+  // Start on the same procurement threshold described in the problem statement.
+  // Keep a safe fallback if the synthetic catalog is changed later.
+  activitySelect.value = catalog.activities.some(function(task){return task.id==='PR-01';})
+    ? 'PR-01'
+    : (catalog.activities[0] ? catalog.activities[0].id : '');
 }
 function chainMarkup(ids, result, isBaseline){
   if(!ids || !ids.length) return '<div class="muted">No chain found.</div>';
