@@ -181,6 +181,8 @@
             <div id="csvCriticalPaths" class="csvpaths"></div>
             <div class="sectionlabel" style="margin-top:14px">Activity trace · total float</div>
             <div class="csvscroll"><table class="csvtable"><thead><tr><th>Activity</th><th>Baseline finish</th><th>Scenario finish</th><th>Float</th><th>Signal</th></tr></thead><tbody id="csvTaskRows"></tbody></table></div>
+            <div class="csvbuttons" style="margin-top:12px"><button id="downloadCsvBriefButton" class="btn btn-secondary" type="button">Download decision brief (.txt)</button></div>
+            <div class="csvsmall" style="margin-top:6px">Exports this analysis and its limits into a shareable text brief. Review it before forwarding; it may contain task names from the CSV.</div>
           </div>
         </div>
       </div>
@@ -341,6 +343,7 @@ document.getElementById('float16Case').addEventListener('click',function(){activ
 
 var customCsvText = '';
 var customCsvReady = false;
+var latestCsvResult = null;
 var csvFileInput = document.getElementById('csvFile');
 var validateCsvButton = document.getElementById('validateCsvButton');
 var loadSampleCsvButton = document.getElementById('loadSampleCsvButton');
@@ -355,6 +358,7 @@ function setCsvStatus(message, kind){
 }
 function resetCsvOutput(){
   customCsvReady=false;
+  latestCsvResult=null;
   csvDisruptedTask.disabled=true;
   csvDelayDays.disabled=true;
   runCsvScenarioButton.disabled=true;
@@ -362,6 +366,7 @@ function resetCsvOutput(){
   document.getElementById('csvOutputEmpty').hidden=false;
 }
 function renderCsvResult(result){
+  latestCsvResult=result;
   document.getElementById('csvOutputEmpty').hidden=true;
   document.getElementById('csvOutput').hidden=false;
   document.getElementById('csvKeyInsight').textContent=result.key_insight;
@@ -389,6 +394,93 @@ function renderCsvResult(result){
   });
   document.getElementById('csvTaskRows').innerHTML=rows;
 }
+function buildCsvDecisionBrief(result){
+  var activities=result.activities || [];
+  var disrupted=result.disrupted_task_id
+    ? activities.find(function(task){return task.task_id===result.disrupted_task_id;})
+    : null;
+  function pathLines(label, paths){
+    var output=[label+':'];
+    (paths || []).forEach(function(path,index){
+      output.push('  CP'+(index+1)+': '+path.join(' -> '));
+    });
+    if(!paths || !paths.length) output.push('  None returned.');
+    return output;
+  }
+  var trace=activities.map(function(task){
+    var signal=task.on_scenario_critical_path?'Critical in scenario':(
+      task.baseline_total_float_days>0 && task.scenario_total_float_days===0?'Float exhausted':(
+        task.baseline_total_float_days>0 && task.scenario_total_float_days<=3
+          ? 'Near-critical'
+          : 'Buffer available'));
+    return task.task_id+' — '+task.task_name+
+      ' | finish: Day '+task.baseline_early_finish_day+' -> Day '+task.scenario_early_finish_day+
+      ' | total float: '+task.baseline_total_float_days+'d -> '+task.scenario_total_float_days+'d'+
+      ' | '+signal;
+  });
+  var disruptionLines=disrupted
+    ? ['Activity: '+disrupted.task_id+' — '+disrupted.task_name,
+       'Added delay: '+result.delay_days+' day(s)',
+       'Total float: '+result.disrupted_task_baseline_total_float_days+'d -> '+result.disrupted_task_scenario_total_float_days+'d',
+       'Float consumed: '+result.disrupted_task_float_consumed_days+' day(s)']
+    : ['Activity delay: none (baseline validation only).'];
+  return [
+    'PROJECT IMPACT LAB — DECISION BRIEF',
+    'Generated: '+new Date().toLocaleString(),
+    '',
+    'PURPOSE',
+    'A deterministic critical-path what-if analysis of a user-supplied CSV schedule.',
+    'This is a scenario, not a prediction, approved recovery plan, or guarantee.',
+    '',
+    'INPUT',
+    'Activities analysed: '+result.activity_count,
+    'Disruption:',
+    ...disruptionLines,
+    '',
+    'PROJECT-FINISH EFFECT',
+    'Baseline finish: Day '+result.baseline_finish_day,
+    'Scenario finish: Day '+result.scenario_finish_day,
+    'Handover slip: '+result.handover_slip_days+' day(s)',
+    'Critical paths: '+result.baseline_critical_path_count+' baseline; '+result.scenario_critical_path_count+' in scenario',
+    '',
+    'KEY INTERPRETATION',
+    result.key_insight,
+    '',
+    ...pathLines('BASELINE CRITICAL PATHS',result.baseline_critical_paths),
+    ...pathLines('SCENARIO CRITICAL PATHS',result.scenario_critical_paths),
+    result.critical_paths_truncated ? 'Note: path display is capped; exact critical-path counts are preserved.' : '',
+    '',
+    'ACTIVITY TRACE',
+    ...trace,
+    '',
+    'VALIDATION SCOPE',
+    result.validation_scope || 'Task dependencies and durations were validated by the schedule analyzer.',
+    result.format_note || '',
+    '',
+    'IMPORTANT LIMITS',
+    'This model uses finish-to-start links and durations. It does not evaluate working calendars, lags, resources, contracts, regulatory approvals, or site conditions.',
+    'Imported schedules are not saved by the application. This text export is generated in the browser and may contain task names from the source CSV.',
+    'Use synthetic or authorised non-confidential data. Review this brief with project controls before making decisions.'
+  ].filter(function(line){return line !== null && line !== undefined;}).join('\n');
+}
+function downloadCsvDecisionBrief(){
+  if(!latestCsvResult){
+    setCsvStatus('Validate a schedule and run a scenario before downloading a decision brief.','error');
+    return;
+  }
+  var blob=new Blob([buildCsvDecisionBrief(latestCsvResult)],{type:'text/plain;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var link=document.createElement('a');
+  link.href=url;
+  link.download='project-impact-lab-decision-brief.txt';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(function(){URL.revokeObjectURL(url);},1000);
+  setCsvStatus('Decision brief downloaded. Check assumptions and sharing permissions before forwarding. No schedule is saved by this application.','success');
+}
+document.getElementById('downloadCsvBriefButton').addEventListener('click',downloadCsvDecisionBrief);
+
 async function submitCsvAnalysis(disruptedId, delayDays){
   if(!customCsvText){setCsvStatus('Choose a CSV file or load the sample first.','error');return;}
   var requestBody={csv_text:customCsvText,disrupted_task_id:disruptedId||null,delay_days:Number(delayDays||0)};

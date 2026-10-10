@@ -131,6 +131,19 @@ def test_dashboard_exposes_csv_workflow_and_accurate_format_caveat():
     assert "No schedule is saved by this application" in page
 
 
+def test_decision_brief_export_is_visible_and_carries_model_limits():
+    response = client.get("/")
+    assert response.status_code == 200
+    page = response.text
+    assert 'id="downloadCsvBriefButton"' in page
+    assert "function buildCsvDecisionBrief(result)" in page
+    assert "result.validation_scope" in page
+    assert "result.format_note" in page
+    assert "This is a scenario, not a prediction, approved recovery plan, or guarantee." in page
+    assert "working calendars, lags, resources, contracts, regulatory approvals, or site conditions" in page
+    assert "may contain task names from the source CSV" in page
+
+
 
 def test_csv_accepts_utf8_bom_trimmed_headers_and_pipe_separated_predecessors():
     csv_text = (
