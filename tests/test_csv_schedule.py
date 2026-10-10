@@ -171,6 +171,6 @@ def test_csv_rejects_rows_with_more_values_than_declared_columns():
 def test_csv_rejects_more_than_supported_activity_count():
     rows = ["task_id,task_name,duration_days,predecessors"]
     rows.extend(f"T{i},Task {i},1," for i in range(2001))
-    response = post_csv("\\n".join(rows))
+    response = post_csv("\n".join(rows))
     assert response.status_code == 422
     assert "2,000-activity limit" in response.json()["detail"]
