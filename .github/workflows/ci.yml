@@ -32,6 +32,26 @@ jobs:
           node --check /tmp/project-impact-lab-dashboard.js
       - name: Test decision brief output with a valid schedule result
         run: node tests/test_decision_brief.js
+      - name: Rebuild synthetic model and check committed artifact
+        run: |
+          python scripts/train_risk_model.py --rows 60000 --seed 20261010 --model-version synthetic-logistic-v1 --max-epochs 240 --output /tmp/risk-model-rebuilt.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          expected = json.loads(Path("app/risk_model.json").read_text(encoding="utf-8"))
+          actual = json.loads(Path("/tmp/risk-model-rebuilt.json").read_text(encoding="utf-8"))
+          assert actual["training_metadata"]["total_rows"] == expected["training_metadata"]["total_rows"]
+          assert actual["training_metadata"]["selected_epoch"] == expected["training_metadata"]["selected_epoch"]
+          for key in ("coefficients", "means", "scales"):
+              assert len(actual[key]) == len(expected[key])
+              assert all(abs(a-b) < 1e-5 for a, b in zip(actual[key], expected[key])), key
+          for key in ("accuracy", "precision", "recall", "f1", "roc_auc", "brier_score"):
+              assert abs(actual["test_metrics"][key] - expected["test_metrics"][key]) <= 0.0001, key
+          print("Synthetic model artifact reproduces from the committed generator.")
+          PY
+      - name: Smoke-test labeled/synthetic training CLI
+        run: python scripts/train_risk_model.py --rows 3000 --seed 42 --max-epochs 30 --output /tmp/risk-model-smoke.json
       - name: Install Playwright and Chromium
         run: |
           npm install --no-save playwright@1.55.0
