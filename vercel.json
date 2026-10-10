@@ -3,7 +3,10 @@
   "framework": "fastapi",
   "functions": {
     "app/main.py": {
-      "includeFiles": "static/**"
+      "includeFiles": [
+        "static/**",
+        "app/models/**"
+      ]
     }
   }
 }
