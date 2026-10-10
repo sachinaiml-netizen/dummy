@@ -159,7 +159,7 @@
             <button id="loadSampleCsvButton" class="btn btn-secondary" type="button">Load sample</button>
           </div>
           <div class="csvsmall" style="margin-top:12px"><a href="/sample-schedule.csv" download style="color:var(--blue)">Download sample CSV</a></div>
-          <div class="csvsmall" style="margin-top:10px">The file is processed for this request and is not saved in an application database. Use synthetic or non-confidential data. This documented CSV adapter does not parse native Primavera P6 XER/XML files.</div>
+          <div class="csvsmall" style="margin-top:10px">CSV contents are sent to this app's API for validation and calculation. The prototype does not save imported schedules in an application database, but it is not a certified secure-ingestion service or a confidentiality guarantee. Use synthetic or approved non-confidential data. This adapter does not parse native Primavera P6 XER/XML files.</div>
           <div id="csvStatus" class="csvstatus" role="status" aria-live="polite">Load the sample or choose your own CSV to begin.</div>
           <div class="csvcontrols">
             <div><label for="csvDisruptedTask">Activity to delay</label><select class="csvinput" id="csvDisruptedTask" disabled><option value="">Validate a CSV first</option></select></div>
@@ -400,6 +400,12 @@ function renderCsvResult(result){
   document.getElementById('csvTaskRows').innerHTML=rows;
 }
 function buildCsvDecisionBrief(result){
+  function briefText(value){
+    return String(value == null ? '' : value)
+      .replace(/[\u0000-\u001F\u007F-\u009F\u2028\u2029]/g,' ')
+      .replace(/\s+/g,' ')
+      .trim();
+  }
   var activities=result.activities || [];
   var disrupted=result.disrupted_task_id
     ? activities.find(function(task){return task.task_id===result.disrupted_task_id;})
@@ -407,7 +413,7 @@ function buildCsvDecisionBrief(result){
   function pathLines(label, paths){
     var output=[label+':'];
     (paths || []).forEach(function(path,index){
-      output.push('  CP'+(index+1)+': '+path.join(' -> '));
+      output.push('  CP'+(index+1)+': '+path.map(briefText).join(' -> '));
     });
     if(!paths || !paths.length) output.push('  None returned.');
     return output;
@@ -418,13 +424,13 @@ function buildCsvDecisionBrief(result){
         task.baseline_total_float_days>0 && task.scenario_total_float_days<=3
           ? 'Near-critical'
           : 'Buffer available'));
-    return task.task_id+' — '+task.task_name+
+    return briefText(task.task_id)+' — '+briefText(task.task_name)+
       ' | finish: Day '+task.baseline_early_finish_day+' -> Day '+task.scenario_early_finish_day+
       ' | total float: '+task.baseline_total_float_days+'d -> '+task.scenario_total_float_days+'d'+
       ' | '+signal;
   });
   var disruptionLines=disrupted
-    ? ['Activity: '+disrupted.task_id+' — '+disrupted.task_name,
+    ? ['Activity: '+briefText(disrupted.task_id)+' — '+briefText(disrupted.task_name),
        'Added delay: '+result.delay_days+' day(s)',
        'Total float: '+result.disrupted_task_baseline_total_float_days+'d -> '+result.disrupted_task_scenario_total_float_days+'d',
        'Float consumed: '+result.disrupted_task_float_consumed_days+' day(s)']
@@ -449,7 +455,7 @@ function buildCsvDecisionBrief(result){
     'Critical paths: '+result.baseline_critical_path_count+' baseline; '+result.scenario_critical_path_count+' in scenario',
     '',
     'KEY INTERPRETATION',
-    result.key_insight,
+    briefText(result.key_insight),
     '',
     ...pathLines('BASELINE CRITICAL PATHS',result.baseline_critical_paths),
     ...pathLines('SCENARIO CRITICAL PATHS',result.scenario_critical_paths),
@@ -459,12 +465,13 @@ function buildCsvDecisionBrief(result){
     ...trace,
     '',
     'VALIDATION SCOPE',
-    result.validation_scope || 'Task dependencies and durations were validated by the schedule analyzer.',
-    result.format_note || '',
+    briefText(result.validation_scope || 'Task dependencies and durations were validated by the schedule analyzer.'),
+    briefText(result.format_note || ''),
     '',
     'IMPORTANT LIMITS',
     'This model uses finish-to-start links and durations. It does not evaluate working calendars, lags, resources, contracts, regulatory approvals, or site conditions.',
-    'Imported schedules are not saved by the application. This text export is generated in the browser and may contain task names from the source CSV.',
+    'CSV contents are sent to this app API for validation and calculation. Imported schedules are not persisted in an application database; this is not a confidentiality or host/provider non-retention guarantee.',
+    'This text export is generated in the browser and may contain task names from the source CSV.',
     'Use synthetic or authorised non-confidential data. Review this brief with project controls before making decisions.'
   ].filter(function(line){return line !== null && line !== undefined;}).join('\n');
 }
