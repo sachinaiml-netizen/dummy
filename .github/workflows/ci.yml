@@ -14,6 +14,8 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -r requirements-dev.txt
+      - name: Reproduce committed synthetic risk model
+        run: python scripts/train_synthetic_risk_model.py --check
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
