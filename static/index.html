@@ -442,15 +442,15 @@ function renderCsvResult(result){
   });
   document.getElementById('csvTaskRows').innerHTML=rows;
 }
-function inlineReportText(value){
-  // User-controlled schedule labels can contain newlines/control characters.
-  // Collapse them to one safe inline value so they cannot forge report sections.
-  return String(value == null ? '' : value)
-    .replace(/[\u0000-\u001f\u007f-\u009f\u2028\u2029]+/g,' ')
-    .replace(/\s+/g,' ')
-    .trim();
-}
 function buildCsvDecisionBrief(result){
+  function inlineReportText(value){
+    // Collapse user-controlled line breaks and control characters so task labels
+    // cannot forge sections in the downloadable text report.
+    return String(value == null ? '' : value)
+      .replace(/[\u0000-\u001f\u007f-\u009f\u2028\u2029]+/g,' ')
+      .replace(/\s+/g,' ')
+      .trim();
+  }
   var activities=result.activities || [];
   var disrupted=result.disrupted_task_id
     ? activities.find(function(task){return task.task_id===result.disrupted_task_id;})
