@@ -30,3 +30,28 @@ class CsvScheduleRequest(BaseModel):
     csv_text: str = Field(min_length=1, max_length=250000)
     disrupted_task_id: str | None = Field(default=None, max_length=80)
     delay_days: int = Field(default=0, ge=0, le=60)
+
+
+
+class ExperimentalRiskResponse(BaseModel):
+    project_id: str
+    model_name: str
+    model_version: str
+    model_status: str
+    algorithm: str
+    synthetic_label_probability_pct: float
+    risk_band: str
+    screening_threshold_pct: float
+    event_definition: str
+    feature_values: dict[str, float]
+    top_signals: list[str]
+    training_sample_count: int
+    validation_sample_count: int
+    heldout_test_sample_count: int
+    heldout_test_roc_auc: float
+    heldout_test_brier_score: float
+    heldout_test_log_loss: float
+    shift_stress_positive_rate_pct: float
+    shift_stress_log_loss: float
+    warnings: list[str]
+    limitations: list[str]

@@ -34,6 +34,14 @@ The deviation index normalizes each signal against an illustrative reference ran
 
 This rule-based design is intentional: fitting an Isolation Forest to synthetic samples creates no evidence of real-world anomaly detection and adds substantial runtime dependencies without strengthening the project's primary schedule-decision demonstration.
 
-## 4. Production evolution
+## 4. Experimental synthetic risk model
+
+The separate `POST /risk-model` endpoint uses a reproducible standardized logistic-regression artifact. It is intentionally separate from both the rule-based `/risk` route and the deterministic Float-Burn Watch schedule simulator. Inference loads a pre-trained artifact and does not run training inside web requests.
+
+The training pipeline uses 115,000 invented examples: 70,000 training, 15,000 validation, 15,000 same-generator holdout, and 15,000 intentionally shifted synthetic stress examples. The held-out same-generator result is ROC-AUC 0.800, Brier score 0.141 and log loss 0.444; a constant base-rate baseline has Brier 0.188 and log loss 0.564. In the shifted synthetic case, the positive rate changes from 25.1% to 55.6% and log loss worsens from 0.444 to 0.492. These metrics measure fit to the authored generator only.
+
+The target is a sampled synthetic label, not an observed delay, cost-overrun or quality outcome. It is not a calibrated real-project probability. Do not use it to approve, reject, price, staff, or take safety/contractual actions on a real project. Model methodology and limitations are recorded in [Synthetic Risk Model](SYNTHETIC_RISK_MODEL.md). Model artifact reproducibility is checked in CI with `python scripts/train_synthetic_risk_model.py --check`.
+
+## 5. Production evolution
 
 A real pilot should use approved historic project snapshots and schedules. Calibrate any scoring thresholds with domain experts, evaluate against held-out time periods, compare against a simple baseline, and report false-positive/false-negative behaviour before presenting any model as validated. Preserve feature provenance, thresholds, model/version metadata and human review records.

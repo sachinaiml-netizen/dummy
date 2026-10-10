@@ -5,7 +5,8 @@ from fastapi.responses import FileResponse
 
 from .decision_engine import analyze_schedule_csv, get_catalog, simulate_project
 from .risk import assess_risk
-from .schemas import CsvScheduleRequest, ProjectTelemetry, RiskResponse, ScenarioRequest
+from .ml_risk import assess_synthetic_risk, model_metadata
+from .schemas import CsvScheduleRequest, ExperimentalRiskResponse, ProjectTelemetry, RiskResponse, ScenarioRequest
 
 app = FastAPI(
     title="Project Impact Lab",
@@ -82,3 +83,17 @@ def analyze_csv_schedule(request: CsvScheduleRequest):
 def risk(project: ProjectTelemetry) -> RiskResponse:
     result = assess_risk(project)
     return RiskResponse(project_id=project.project_id, **result)
+
+
+
+@app.post("/risk-model", response_model=ExperimentalRiskResponse)
+def experimental_risk_model(project: ProjectTelemetry) -> ExperimentalRiskResponse:
+    """Experimental score from a model trained exclusively on synthetic labels."""
+    result = assess_synthetic_risk(project)
+    return ExperimentalRiskResponse(**result)
+
+
+@app.get("/risk-model/info")
+def experimental_risk_model_info():
+    """Return version, synthetic evaluation metrics and model limitations."""
+    return model_metadata()

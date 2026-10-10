@@ -1,0 +1,108 @@
+{
+  "model_name": "Project Impact Lab Synthetic Risk Screening Model",
+  "model_version": "0.1.0-synthetic",
+  "model_status": "EXPERIMENTAL_SYNTHETIC_ONLY",
+  "algorithm": "Standard-library logistic regression with standardized inputs and L2 regularization",
+  "feature_names": [
+    "schedule_gap_pp",
+    "positive_budget_variance_pct",
+    "vendor_delay_days",
+    "open_issues",
+    "quality_defects"
+  ],
+  "feature_means": [
+    5.0675628591,
+    5.0427718695,
+    7.1279142857,
+    8.0156,
+    3.7327142857
+  ],
+  "feature_scales": [
+    5.8979922571,
+    6.2104415624,
+    9.6911555079,
+    10.9163003707,
+    4.2314217204
+  ],
+  "coefficients": [
+    0.705494637,
+    0.2427174801,
+    0.6652666517,
+    0.3962071967,
+    0.4368918738
+  ],
+  "intercept": -1.3151208958,
+  "decision_thresholds": {
+    "watch": 0.25,
+    "high": 0.5,
+    "note": "Synthetic-validation screening cutoffs only; not calibrated business decision thresholds."
+  },
+  "training": {
+    "seed": 20261010,
+    "train_rows": 70000,
+    "validation_rows": 15000,
+    "test_rows": 15000,
+    "shift_stress_rows": 15000,
+    "total_synthetic_rows_generated": 115000,
+    "training_label_prevalence": 0.255214,
+    "best_validation_epoch": 100,
+    "validation_log_loss": 0.447883,
+    "generator": "reproducible synthetic generator v1",
+    "label_definition": "Simulated Bernoulli label for elevated risk in the next reporting cycle, created by an authored rule with hidden project-pressure and interaction noise; not an observed construction outcome."
+  },
+  "evaluation": {
+    "test": {
+      "n": 15000,
+      "positive_rate": 0.2512,
+      "roc_auc": 0.800235,
+      "brier_score": 0.141409,
+      "log_loss": 0.443514,
+      "accuracy_at_0_5": 0.800467,
+      "review_threshold_0_25": {
+        "flagged_pct": 0.375467,
+        "precision": 0.480469,
+        "recall": 0.718153,
+        "specificity": 0.739494
+      },
+      "review_threshold_confusion": {
+        "tp": 2706,
+        "fp": 2926,
+        "tn": 8306,
+        "fn": 1062
+      },
+      "constant_base_rate_baseline": {
+        "brier_score": 0.188115,
+        "log_loss": 0.563692,
+        "roc_auc": 0.5
+      }
+    },
+    "shift_stress": {
+      "n": 15000,
+      "positive_rate": 0.556267,
+      "roc_auc": 0.849408,
+      "brier_score": 0.162777,
+      "log_loss": 0.491799,
+      "review_threshold_0_25": {
+        "flagged_pct": 0.711867,
+        "precision": 0.707717,
+        "recall": 0.905681,
+        "specificity": 0.5311
+      },
+      "review_threshold_confusion": {
+        "tp": 7557,
+        "fp": 3121,
+        "tn": 3535,
+        "fn": 787
+      },
+      "interpretation": "Intentionally shifted synthetic case only; changed feature frequencies and label rule do not validate performance on real projects."
+    }
+  },
+  "limitations": [
+    "All examples and labels are synthetic and follow authored assumptions.",
+    "Metrics apply only to generated holdout data from the same assumed generator.",
+    "The shifted synthetic evaluation is not a real-world or Prestige validation set.",
+    "The model is not trained on Prestige data and is not calibrated to real project outcomes or event rates.",
+    "The score is not a contractual forecast, site-safety judgement, approval, or instruction to act.",
+    "Before any real pilot, obtain permissioned historical project snapshots with outcome labels; evaluate on held-out projects and later time periods; compare to simple baselines; validate thresholds with project controls; then monitor drift and calibration."
+  ]
+}

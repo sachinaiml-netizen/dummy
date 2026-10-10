@@ -190,6 +190,49 @@
   </section>
 
   <div style="height:16px"></div>
+  <section class="panel" id="riskModelPanel">
+    <div class="panelhead"><h3>Experimental synthetic risk model</h3><span class="index">08 / MODEL LAB</span></div>
+    <div class="panelbody">
+      <div class="csvintro">Try a telemetry snapshot with a trained logistic-regression model. Its labels and all reported metrics come from generated synthetic data, not observed construction outcomes. Use it to exercise the workflow, not to approve a project decision.</div>
+      <div class="csvgrid">
+        <div class="csvbox">
+          <form id="riskModelForm">
+            <div class="csvcontrols">
+              <div><label for="riskProjectId">Project reference</label><input class="csvinput" id="riskProjectId" name="project_id" maxlength="80" value="SYNTHETIC-DEMO" required></div>
+              <div><label for="riskPlannedProgress">Planned progress (%)</label><input class="csvinput" id="riskPlannedProgress" name="planned_progress" type="number" min="0" max="100" step="0.1" value="80" required></div>
+              <div><label for="riskActualProgress">Actual progress (%)</label><input class="csvinput" id="riskActualProgress" name="actual_progress" type="number" min="0" max="100" step="0.1" value="55" required></div>
+              <div><label for="riskBudgetVariance">Budget variance (%)</label><input class="csvinput" id="riskBudgetVariance" name="budget_variance_pct" type="number" min="-100" max="500" step="0.1" value="12" required></div>
+              <div><label for="riskVendorDelay">Vendor delay (days)</label><input class="csvinput" id="riskVendorDelay" name="vendor_delay_days" type="number" min="0" max="365" step="1" value="14" required></div>
+              <div><label for="riskOpenIssues">Open issues</label><input class="csvinput" id="riskOpenIssues" name="open_issues" type="number" min="0" max="10000" step="1" value="20" required></div>
+              <div><label for="riskQualityDefects">Quality defects</label><input class="csvinput" id="riskQualityDefects" name="quality_defects" type="number" min="0" max="10000" step="1" value="10" required></div>
+            </div>
+            <div class="csvbuttons" style="margin-top:12px"><button id="runRiskModelButton" class="btn btn-primary" type="submit">Evaluate synthetic risk →</button></div>
+          </form>
+          <div id="riskModelStatus" class="csvstatus" role="status" aria-live="polite">Ready to evaluate a synthetic training-model example.</div>
+          <div class="csvsmall" style="margin-top:10px">API: <code>POST /risk-model</code> · Model card: <code>GET /risk-model/info</code>. Existing <code>POST /risk</code> remains the separate rule-based baseline.</div>
+        </div>
+        <div class="csvbox">
+          <div class="sectionlabel">Synthetic-label screening result</div>
+          <div id="riskModelOutputEmpty" class="csvsmall">Submit the example to see the model score, top contributing input signals, held-out test metrics and explicit limits.</div>
+          <div id="riskModelOutput" hidden>
+            <div class="csvsummary">
+              <div class="stat"><div class="statlabel">Synthetic-label score</div><div id="riskModelProbability" class="statvalue">—</div><div class="csvsmall">Not a real-world delay probability</div></div>
+              <div class="stat"><div class="statlabel">Screening band</div><div id="riskModelBand" class="statvalue">—</div><div id="riskModelVersion" class="csvsmall">—</div></div>
+            </div>
+            <div id="riskModelDefinition" class="csvsmall" style="margin-top:8px"></div>
+            <div class="sectionlabel" style="margin-top:14px">Largest positive model terms</div>
+            <ul id="riskModelSignals" class="listclean"></ul>
+            <div class="sectionlabel" style="margin-top:14px">Synthetic validation evidence</div>
+            <div id="riskModelMetrics" class="csvsmall"></div>
+            <div class="sectionlabel" style="margin-top:14px">Warnings</div>
+            <ul id="riskModelWarnings" class="listclean"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div style="height:16px"></div>
   <section class="panel">
     <div class="panelhead"><h3>Activity-level impact trace</h3><span class="index">04 / TRACEABILITY</span></div>
     <div class="schedule-wrap">
@@ -200,7 +243,7 @@
   <div style="height:16px"></div>
   <section class="footgrid">
     <div class="panel"><div class="panelhead"><h3>How this could fit a real project stack</h3><span class="index">05 / ARCHITECTURE</span></div><div class="panelbody"><ol class="listclean"><li><strong style="color:#e4edf5">Ingest (future adapter):</strong> milestone dates and activity links from an approved schedule export; issue and procurement status from allowed data sources.</li><li><strong style="color:#e4edf5">Normalize:</strong> align IDs, calendars, owners, status timestamps and dependencies; quarantine stale or incomplete records.</li><li><strong style="color:#e4edf5">Simulate:</strong> propagate a disruption through the dependency graph and compare the original plan against plausible interventions.</li><li><strong style="color:#e4edf5">Explain:</strong> show the critical chain, affected successors, estimated recovery, assumed cost and reasons behind the ranking.</li><li><strong style="color:#e4edf5">Govern:</strong> project owner reviews the evidence and action. Log assumptions, version and approval; never auto-approve construction or regulatory decisions.</li></ol></div></div>
-    <div class="panel"><div class="panelhead"><h3>Model card & guardrails</h3><span class="index">06 / TRUST</span></div><div class="panelbody"><ul class="listclean"><li><strong style="color:#e4edf5">Method:</strong> deterministic dependency graph + longest-path schedule propagation; scenario search across a small set of illustrative recovery actions.</li><li><strong style="color:#e4edf5">Not claimed:</strong> no learned delay probability, no causal proof, no Autodesk / Primavera connection and no access to Prestige data.</li><li><strong style="color:#e4edf5">Needed for validation:</strong> approved activity histories, working calendars, resource constraints, intervention cost ranges and actual planned/actual completion outcomes.</li><li><strong style="color:#e4edf5">Before a pilot:</strong> test against historic projects, report error and sensitivity, review false alerts, verify security / access control, and retain human sign-off.</li></ul></div></div>
+    <div class="panel"><div class="panelhead"><h3>Model card & guardrails</h3><span class="index">06 / TRUST</span></div><div class="panelbody"><ul class="listclean"><li><strong style="color:#e4edf5">Method:</strong> deterministic dependency graph + longest-path schedule propagation; a separate experimental logistic-regression model uses synthetic labels only.</li><li><strong style="color:#e4edf5">Not claimed:</strong> no real-world risk calibration, no causal proof, no Autodesk / Primavera connection and no access to Prestige data.</li><li><strong style="color:#e4edf5">Needed for validation:</strong> approved activity histories, working calendars, resource constraints, intervention cost ranges and actual planned/actual completion outcomes.</li><li><strong style="color:#e4edf5">Before a pilot:</strong> test against historic projects, report error and sensitivity, review false alerts, verify security / access control, and retain human sign-off.</li></ul></div></div>
   </section>
   <footer class="footer"><span>PROJECT IMPACT LAB · Student proof of concept · Synthetic data</span><span>Concept: a decision-rehearsal layer above existing systems, not a replacement</span></footer>
 </div>
@@ -400,9 +443,11 @@ function renderCsvResult(result){
   document.getElementById('csvTaskRows').innerHTML=rows;
 }
 function buildCsvDecisionBrief(result){
-  function briefText(value){
+  function inlineReportText(value){
+    // Collapse user-controlled line breaks and control characters so task labels
+    // cannot forge sections in the downloadable text report.
     return String(value == null ? '' : value)
-      .replace(/[\u0000-\u001F\u007F-\u009F\u2028\u2029]/g,' ')
+      .replace(/[\u0000-\u001f\u007f-\u009f\u2028\u2029]+/g,' ')
       .replace(/\s+/g,' ')
       .trim();
   }
@@ -413,7 +458,7 @@ function buildCsvDecisionBrief(result){
   function pathLines(label, paths){
     var output=[label+':'];
     (paths || []).forEach(function(path,index){
-      output.push('  CP'+(index+1)+': '+path.map(briefText).join(' -> '));
+      output.push('  CP'+(index+1)+': '+path.map(inlineReportText).join(' -> '));
     });
     if(!paths || !paths.length) output.push('  None returned.');
     return output;
@@ -424,38 +469,38 @@ function buildCsvDecisionBrief(result){
         task.baseline_total_float_days>0 && task.scenario_total_float_days<=3
           ? 'Near-critical'
           : 'Buffer available'));
-    return briefText(task.task_id)+' — '+briefText(task.task_name)+
-      ' | finish: Day '+task.baseline_early_finish_day+' -> Day '+task.scenario_early_finish_day+
-      ' | total float: '+task.baseline_total_float_days+'d -> '+task.scenario_total_float_days+'d'+
+    return inlineReportText(task.task_id)+' — '+inlineReportText(task.task_name)+
+      ' | finish: Day '+inlineReportText(task.baseline_early_finish_day)+' -> Day '+inlineReportText(task.scenario_early_finish_day)+
+      ' | total float: '+inlineReportText(task.baseline_total_float_days)+'d -> '+inlineReportText(task.scenario_total_float_days)+'d'+
       ' | '+signal;
   });
   var disruptionLines=disrupted
-    ? ['Activity: '+briefText(disrupted.task_id)+' — '+briefText(disrupted.task_name),
-       'Added delay: '+result.delay_days+' day(s)',
-       'Total float: '+result.disrupted_task_baseline_total_float_days+'d -> '+result.disrupted_task_scenario_total_float_days+'d',
-       'Float consumed: '+result.disrupted_task_float_consumed_days+' day(s)']
+    ? ['Activity: '+inlineReportText(disrupted.task_id)+' — '+inlineReportText(disrupted.task_name),
+       'Added delay: '+inlineReportText(result.delay_days)+' day(s)',
+       'Total float: '+inlineReportText(result.disrupted_task_baseline_total_float_days)+'d -> '+inlineReportText(result.disrupted_task_scenario_total_float_days)+'d',
+       'Float consumed: '+inlineReportText(result.disrupted_task_float_consumed_days)+' day(s)']
     : ['Activity delay: none (baseline validation only).'];
   return [
     'PROJECT IMPACT LAB — DECISION BRIEF',
-    'Generated: '+new Date().toLocaleString(),
+    'Generated: '+inlineReportText(new Date().toLocaleString()),
     '',
     'PURPOSE',
     'A deterministic critical-path what-if analysis of a user-supplied CSV schedule.',
     'This is a scenario, not a prediction, approved recovery plan, or guarantee.',
     '',
     'INPUT',
-    'Activities analysed: '+result.activity_count,
+    'Activities analysed: '+inlineReportText(result.activity_count),
     'Disruption:',
     ...disruptionLines,
     '',
     'PROJECT-FINISH EFFECT',
-    'Baseline finish: Day '+result.baseline_finish_day,
-    'Scenario finish: Day '+result.scenario_finish_day,
-    'Handover slip: '+result.handover_slip_days+' day(s)',
-    'Critical paths: '+result.baseline_critical_path_count+' baseline; '+result.scenario_critical_path_count+' in scenario',
+    'Baseline finish: Day '+inlineReportText(result.baseline_finish_day),
+    'Scenario finish: Day '+inlineReportText(result.scenario_finish_day),
+    'Handover slip: '+inlineReportText(result.handover_slip_days)+' day(s)',
+    'Critical paths: '+inlineReportText(result.baseline_critical_path_count)+' baseline; '+inlineReportText(result.scenario_critical_path_count)+' in scenario',
     '',
     'KEY INTERPRETATION',
-    briefText(result.key_insight),
+    inlineReportText(result.key_insight),
     '',
     ...pathLines('BASELINE CRITICAL PATHS',result.baseline_critical_paths),
     ...pathLines('SCENARIO CRITICAL PATHS',result.scenario_critical_paths),
@@ -465,8 +510,8 @@ function buildCsvDecisionBrief(result){
     ...trace,
     '',
     'VALIDATION SCOPE',
-    briefText(result.validation_scope || 'Task dependencies and durations were validated by the schedule analyzer.'),
-    briefText(result.format_note || ''),
+    inlineReportText(result.validation_scope || 'Task dependencies and durations were validated by the schedule analyzer.'),
+    inlineReportText(result.format_note || ''),
     '',
     'IMPORTANT LIMITS',
     'This model uses finish-to-start links and durations. It does not evaluate working calendars, lags, resources, contracts, regulatory approvals, or site conditions.',
@@ -491,9 +536,77 @@ function downloadCsvDecisionBrief(){
   link.click();
   link.remove();
   setTimeout(function(){URL.revokeObjectURL(url);},1000);
-  setCsvStatus('Decision brief downloaded. Check assumptions and sharing permissions before forwarding. No schedule is saved by this application.','success');
+  setCsvStatus('Decision brief downloaded. Check assumptions and sharing permissions before forwarding. Schedules are not persisted as application database records.','success');
 }
 document.getElementById('downloadCsvBriefButton').addEventListener('click',downloadCsvDecisionBrief);
+
+var riskModelForm = document.getElementById('riskModelForm');
+var runRiskModelButton = document.getElementById('runRiskModelButton');
+
+function renderRiskModelResult(result){
+  document.getElementById('riskModelOutputEmpty').hidden=true;
+  document.getElementById('riskModelOutput').hidden=false;
+  document.getElementById('riskModelProbability').textContent=Number(result.synthetic_label_probability_pct).toFixed(1)+'%';
+  document.getElementById('riskModelBand').textContent=result.risk_band;
+  document.getElementById('riskModelBand').className='statvalue '+(result.risk_band==='HIGH'?'warn':(result.risk_band==='WATCH'?'neutral':'accent'));
+  document.getElementById('riskModelVersion').textContent=result.model_version+' · '+result.model_status;
+  document.getElementById('riskModelDefinition').textContent='Model target: '+result.event_definition;
+  var signals=document.getElementById('riskModelSignals');
+  signals.textContent='';
+  (result.top_signals||[]).forEach(function(signal){
+    var item=document.createElement('li');
+    item.textContent=signal;
+    signals.appendChild(item);
+  });
+  var metrics=document.getElementById('riskModelMetrics');
+  metrics.textContent='Training rows: '+result.training_sample_count.toLocaleString()+
+    ' · validation rows: '+result.validation_sample_count.toLocaleString()+
+    ' · independent synthetic test rows: '+result.heldout_test_sample_count.toLocaleString()+
+    '. Test ROC AUC '+Number(result.heldout_test_roc_auc).toFixed(3)+
+    '; Brier score '+Number(result.heldout_test_brier_score).toFixed(3)+
+    '; log loss '+Number(result.heldout_test_log_loss).toFixed(3)+
+    '. Shifted synthetic check: event rate '+Number(result.shift_stress_positive_rate_pct).toFixed(1)+
+    '%; log loss '+Number(result.shift_stress_log_loss).toFixed(3)+'.';
+  var warnings=document.getElementById('riskModelWarnings');
+  warnings.textContent='';
+  (result.warnings||[]).slice(0,4).forEach(function(warning){
+    var item=document.createElement('li');
+    item.textContent=warning;
+    warnings.appendChild(item);
+  });
+}
+riskModelForm.addEventListener('submit',async function(event){
+  event.preventDefault();
+  if(!riskModelForm.reportValidity()) return;
+  var payload={
+    project_id:document.getElementById('riskProjectId').value.trim(),
+    planned_progress:Number(document.getElementById('riskPlannedProgress').value),
+    actual_progress:Number(document.getElementById('riskActualProgress').value),
+    budget_variance_pct:Number(document.getElementById('riskBudgetVariance').value),
+    vendor_delay_days:Number(document.getElementById('riskVendorDelay').value),
+    open_issues:Number(document.getElementById('riskOpenIssues').value),
+    quality_defects:Number(document.getElementById('riskQualityDefects').value)
+  };
+  runRiskModelButton.disabled=true;
+  runRiskModelButton.textContent='Evaluating synthetic model…';
+  var status=document.getElementById('riskModelStatus');
+  status.textContent='Validating telemetry and evaluating the versioned model…';
+  status.className='csvstatus';
+  try{
+    var response=await fetch('/risk-model',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    var body=await response.json();
+    if(!response.ok) throw new Error(typeof body.detail==='string'?body.detail:'Model request failed validation.');
+    renderRiskModelResult(body);
+    status.textContent='Experimental result ready. Review the warnings before interpreting the score.';
+    status.className='csvstatus success';
+  }catch(error){
+    status.textContent=error.message || 'Could not evaluate the experimental model.';
+    status.className='csvstatus error';
+  }finally{
+    runRiskModelButton.disabled=false;
+    runRiskModelButton.textContent='Evaluate synthetic risk →';
+  }
+});
 
 async function submitCsvAnalysis(disruptedId, delayDays){
   if(!customCsvText){setCsvStatus('Choose a CSV file or load the sample first.','error');return;}
