@@ -123,3 +123,47 @@ Without reading your notes, explain in plain language:
 5. Two limitations and one way to validate the concept in 40 seconds.
 
 If you cannot explain one of these, reread that section instead of adding another feature.
+
+
+## Final readiness gate — 20 minutes
+
+Close the README and answer these aloud without reading. You are ready to demonstrate the project if you can answer all 10 clearly in your own words. If you miss one, revisit the named file and retry.
+
+1. **What exact problem are you testing?**  
+   A task can be delayed while handover stays unchanged because it has float. The prototype shows when that buffer is consumed and when a delay begins moving modeled handover. See `docs/PROBLEM_STATEMENT.md`.
+
+2. **What does 14 / 15 / 16 days mean in the demo?**  
+   Procurement starts with 15 days of float: after 14 days, 1 day remains and handover stays Day 119; after 15 days, float is zero and two paths are critical; after 16 days, modeled handover moves to Day 120.
+
+3. **What is total float in this implementation?**  
+   Latest start minus earliest start, computed from the CPM forward and backward passes. Zero-float activities are critical in this simplified model.
+
+4. **What does the frontend do versus the backend?**  
+   HTML/CSS/JavaScript present controls and results. JavaScript sends requests to FastAPI. Python validates the network, calculates the schedule, and returns JSON.
+
+5. **What does the CSV intake accept—and reject?**  
+   A generic CSV with `task_id, task_name, duration_days, predecessors`; optional `owner, stream`. It rejects duplicate IDs, invalid durations, unknown predecessor references and cycles. It does not parse native P6 XER/XML.
+
+6. **Is the schedule engine AI?**  
+   No. It is deterministic CPM. AI-assisted tools helped with development; do not claim a trained prediction model exists.
+
+7. **Where did the schedule and cost data come from?**  
+   They are synthetic assumptions created for the demo. No Prestige internal data or live system is connected.
+
+8. **What does the ₹19 lakh example mean?**  
+   It is arithmetic under assumptions: 6 days × ₹4.5 lakh/day − ₹8 lakh = ₹19 lakh illustrative net value. It is not a saving forecast or a recommendation to execute the action.
+
+9. **Why is this not a replacement for Autodesk or Primavera?**  
+   Those products already support mature scheduling/risk capabilities. This is a small, inspectable explanation workflow whose usefulness alongside existing tools still needs validation.
+
+10. **What evidence would you need before a real pilot?**  
+    An approved schedule export, correct calendars and relationship rules, validated intervention costs/resources, review by project-controls experts, historical back-testing, and measured usefulness versus the existing workflow.
+
+### Pass criteria
+
+- Answer all 10 without inventing Prestige facts.
+- Demonstrate the 14/15/16 threshold without notes.
+- Point to the exact code file responsible for each calculation.
+- State at least three limitations without being prompted.
+
+If you cannot do these yet, do not oversell the project. Study the missed sections again; the point is understanding, not memorising a script.
