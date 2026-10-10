@@ -32,6 +32,8 @@ jobs:
           node --check /tmp/project-impact-lab-dashboard.js
       - name: Test decision brief output with a valid schedule result
         run: node tests/test_decision_brief.js
+      - name: Smoke-test reproducible risk-model training pipeline
+        run: python tools/train_synthetic_risk_model.py --samples 5000 --seed 20261010 --output /tmp/ci-synthetic-risk-model.json
       - name: Install Playwright and Chromium
         run: |
           npm install --no-save playwright@1.55.0
