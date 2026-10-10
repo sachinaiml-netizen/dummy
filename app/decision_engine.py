@@ -369,7 +369,7 @@ def _sensitivity_summary(
 
 
 def simulate_project(
-    disrupted_activity_id: str = "ST-01",
+    disrupted_activity_id: str = "PR-01",
     delay_days: int = 14,
     exposure_lakh_per_day: float = EXAMPLE_EXPOSURE_LAKH_PER_DAY,
 ) -> dict[str, Any]:
