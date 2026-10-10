@@ -39,6 +39,12 @@ Required columns: `task_id`, `task_name`, `duration_days`, and `predecessors`. O
 
 This is **not** a native Primavera P6 XER/XML parser or live integration. Oracle documents P6 XML/XER as its exchange formats; this prototype needs a mapped CSV export in its own schema. The API checks graph structure but does not validate working calendars, actuals, lags, resources, contract terms or site conditions. CSV contents are sent to this app's API for validation and calculation. Imported schedules are not persisted in an application database, but that is not a confidentiality or host/provider non-retention guarantee, and this is not a certified secure data-ingestion service. Use synthetic or approved non-confidential data.
 
+## Experimental future delay-risk model
+
+A separate research endpoint, `POST /api/risk/predict`, serves a compact logistic-regression model trained on 50,000 synthetic snapshots. Its synthetic holdout ROC-AUC is 0.8227 and Brier score is 0.1598. Those results are valid only within the generator used for evaluation; they do **not** validate predictions on Prestige or other real projects. The original `POST /risk` heuristic remains for compatibility.
+
+See [the model card](docs/SYNTHETIC_RISK_MODEL_CARD.md) for feature definitions, training, holdout metrics, score-withholding rules, and a labelled-CSV route for future authorised adaptation. Production prediction uses standard-library Python; scikit-learn is a development/training dependency only.
+
 ## Why this is a more useful interview demonstration
 
 It contains two deliberately contrasting scenarios:
