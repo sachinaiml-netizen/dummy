@@ -129,3 +129,48 @@ def test_dashboard_exposes_csv_workflow_and_accurate_format_caveat():
     assert 'id="csvSchedulePanel"' in page
     assert "does not parse native Primavera P6 XER/XML files" in page
     assert "No schedule is saved by this application" in page
+
+
+
+def test_csv_accepts_utf8_bom_trimmed_headers_and_pipe_separated_predecessors():
+    csv_text = (
+        "\ufeff task_id , task_name , duration_days , predecessors , owner \n"
+        "A,Approval,2,,PM\n"
+        "B,Design,3,A| A2,Designer\n"
+        "A2,Permit,1,,Reviewer\n"
+    )
+    response = post_csv(csv_text)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["activity_count"] == 3
+    by_id = {row["task_id"]: row for row in data["activities"]}
+    assert by_id["B"]["predecessors"] == ["A", "A2"]
+    assert data["baseline_finish_day"] == 5
+
+
+def test_csv_rejects_headers_that_collide_after_normalization():
+    csv_text = (
+        "task_id, task_id ,task_name,duration_days,predecessors\n"
+        "A,A,Approval,2,\n"
+    )
+    response = post_csv(csv_text)
+    assert response.status_code == 422
+    assert "duplicate column names" in response.json()["detail"]
+
+
+def test_csv_rejects_rows_with_more_values_than_declared_columns():
+    csv_text = (
+        "task_id,task_name,duration_days,predecessors\n"
+        "A,Approval,2,,unexpected\n"
+    )
+    response = post_csv(csv_text)
+    assert response.status_code == 422
+    assert "more values than the header" in response.json()["detail"]
+
+
+def test_csv_rejects_more_than_supported_activity_count():
+    rows = ["task_id,task_name,duration_days,predecessors"]
+    rows.extend(f"T{i},Task {i},1," for i in range(2001))
+    response = post_csv("\\n".join(rows))
+    assert response.status_code == 422
+    assert "2,000-activity limit" in response.json()["detail"]
