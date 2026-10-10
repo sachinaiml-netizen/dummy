@@ -34,6 +34,16 @@ The deviation index normalizes each signal against an illustrative reference ran
 
 This rule-based design is intentional: fitting an Isolation Forest to synthetic samples creates no evidence of real-world anomaly detection and adds substantial runtime dependencies without strengthening the project's primary schedule-decision demonstration.
 
-## 4. Production evolution
+## 4. Synthetic-trained risk proof model
+
+A separate optional model sits beside—rather than replacing—the deterministic CPM engine. `POST /api/risk/proof-model` scores a telemetry snapshot using a standardized logistic-regression artifact in `app/risk_model.json`. It returns a synthetic-model score, provisional score band, per-feature logit contributions and same-generator held-out metrics. The current artifact contains 60,000 generated examples (42,000 train / 9,000 validation / 9,000 test) and does not use Prestige data.
+
+The stdlib-only training pipeline is `scripts/train_risk_model.py`. Its synthetic mode produces reproducible examples and an invented probabilistic target; its optional CSV mode requires already-labelled historical snapshots with `project_id`, `snapshot_date`, current telemetry fields and `target_high_risk_30d`. It uses a chronological split with a 30-day embargo by default, excludes project IDs from model features, and reports accuracy, precision, recall, F1, ROC-AUC, Brier score, a majority baseline and a confusion matrix. It does not create observed outcome labels from input features.
+
+**Validity boundary:** current reported ROC-AUC and accuracy measure fit to the synthetic generator only. They are not external validation, real-world calibration or evidence of performance on Prestige. For a real candidate, project controls must define the event and horizon (for example, an agreed adverse milestone/cost/quality outcome within 30 days of snapshot), label historical outcomes, check temporal and project-level generalization, review false negatives/positives and subgroup performance, and retain human decision authority. The thresholds 35% and 65% are UI demo bands, not operational thresholds.
+
+This workflow follows common ML practice to keep training and test data separate and to ensure the test set resembles future use, and NIST's emphasis on validity, reliability and external validity: [Google's dataset-splitting guidance](https://developers.google.com/machine-learning/crash-course/overfitting/dividing-datasets), [Google's ML Rules](https://developers.google.com/machine-learning/guides/rules-of-ml/), [NIST AI RMF](https://www.nist.gov/itl/ai-risk-management-framework), and [NIST AI trustworthiness characteristics](https://airc.nist.gov/airmf-resources/airmf/3-sec-characteristics/).
+
+## 5. Production evolution
 
 A real pilot should use approved historic project snapshots and schedules. Calibrate any scoring thresholds with domain experts, evaluate against held-out time periods, compare against a simple baseline, and report false-positive/false-negative behaviour before presenting any model as validated. Preserve feature provenance, thresholds, model/version metadata and human review records.
