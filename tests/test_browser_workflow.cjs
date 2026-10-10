@@ -116,7 +116,8 @@ async function main() {
       "Handover slip: 0 day(s)",
       "not parse native Primavera P6 XER/XML",
       "This model uses finish-to-start links",
-      "Imported schedules are not saved by the application"
+      "CSV contents are sent to this app API for validation and calculation",
+      "not a confidentiality or host/provider non-retention guarantee"
     ]) {
       assert.ok(brief.includes(expected), "Downloaded brief missing expected text: " + expected);
     }
