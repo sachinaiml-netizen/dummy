@@ -138,6 +138,25 @@ async function main() {
     assert.equal(await page.locator("#csvTaskRows img").count(), 0, "CSV task names must not create HTML elements");
     assert.equal(await page.evaluate(() => window.__xss || false), false, "CSV task names must not execute script");
 
+    // An invalid dependency must show a readable error and invalidate the previous result.
+    const invalidCsv = "task_id,task_name,duration_days,predecessors\\nA,Approval,2,MISSING\\n";
+    await page.locator("#csvFile").setInputFiles({
+      name: "invalid-missing-predecessor.csv",
+      mimeType: "text/csv",
+      buffer: Buffer.from(invalidCsv, "utf8")
+    });
+    await page.waitForFunction(() =>
+      document.querySelector("#csvStatus")?.textContent.includes("File selected")
+    );
+    await page.locator("#validateCsvButton").click();
+    await page.waitForFunction(() =>
+      document.querySelector("#csvStatus")?.className.includes("error") &&
+      document.querySelector("#csvStatus")?.textContent.includes("Unknown predecessor")
+    );
+    assert.equal(await page.locator("#csvOutput").isHidden(), true, "Invalid schedule must not leave a stale report visible");
+    assert.equal(await page.locator("#runCsvScenarioButton").isDisabled(), true, "Invalid schedule must not be available for scenario runs");
+    assert.equal(await page.locator("#downloadCsvBriefButton").isVisible(), false, "Invalid schedule must not allow export of a stale decision brief");
+
     assert.deepEqual(pageErrors, [], "Unexpected browser exceptions: " + pageErrors.join("; "));
     console.log("Browser E2E passed: threshold boundaries, sample download/upload, CSV analysis, decision-brief download/content, and safe task-name rendering.");
   } finally {
