@@ -39,6 +39,19 @@
 
 @media(max-width:1050px){.hero{grid-template-columns:1fr}.problem-brief{grid-template-columns:1fr}.layout{grid-template-columns:1fr}.analysisgrid{grid-template-columns:1fr}.hero-copy h2{font-size:30px}}
 @media(max-width:680px){.wrap{padding:16px 12px 28px}.top{align-items:flex-start;flex-direction:column}.brand h1{font-size:21px}.kpis{grid-template-columns:1fr 1fr}.kpi .value{font-size:24px}.hero-copy,.thesis{padding:17px}.panelbody{padding:13px}.footgrid{grid-template-columns:1fr}.analysisgrid{gap:12px}}
+
+.riskformgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:14px}
+.riskfield{min-width:0}.riskfield label{display:block;font-size:10px;color:#b9c8d8;font-weight:800;margin-bottom:6px}
+.riskmodelmetrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:14px 0}
+.riskmetric{background:#0d1721;border:1px solid #293b4e;border-radius:9px;padding:11px}
+.riskmetric strong{display:block;font-size:17px;color:var(--lime);margin-bottom:3px}
+.riskmetric span{font-size:9px;color:var(--muted);line-height:1.45}
+.riskresultgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:14px}
+.riskdriver{padding:8px 0;border-bottom:1px solid #223142;font-size:11px}
+.riskdriver:last-child{border-bottom:0}
+@media(max-width:1000px){.riskformgrid{grid-template-columns:repeat(2,minmax(0,1fr))}.riskmodelmetrics,.riskresultgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.riskformgrid,.riskmodelmetrics,.riskresultgrid{grid-template-columns:1fr}}
+
 </style>
 </head>
 <body>
@@ -198,9 +211,47 @@
   </section>
 
   <div style="height:16px"></div>
+  <section class="panel" id="riskModelPanel">
+    <div class="panelhead"><h3>Future delay-risk model</h3><span class="index">07 / EXPERIMENTAL ML</span></div>
+    <div class="panelbody">
+      <p class="csvintro">A compact Logistic Regression model trained on 50,000 generated project snapshots. It estimates the generated target of a material handover delay (&gt;7 days) within the next 60 days. Results and metrics are synthetic-only until validated on authorized real project outcomes.</p>
+      <div class="riskmodelmetrics" id="riskModelMetrics"><div class="riskmetric"><strong>Loading…</strong><span>Model metadata and holdout metrics</span></div></div>
+      <div class="assumption"><strong style="color:#dce6ef">Important:</strong> This has not been trained or validated on Prestige data. The displayed percentage is not a calibrated real-world probability. Inputs are sent to this API; this prototype does not save a snapshot as a database row, but that is not a confidentiality or host/provider non-retention guarantee. Use synthetic or approved non-confidential data only.</div>
+      <form id="riskModelForm" autocomplete="off">
+        <div class="riskformgrid">
+          <div class="riskfield"><label for="riskProjectId">Project reference</label><input class="csvinput" id="riskProjectId" type="text" maxlength="80" value="SYNTHETIC-DEMO-01" required></div>
+          <div class="riskfield"><label for="riskPhase">Current phase</label><select class="csvinput" id="riskPhase" required><option value="design">Design</option><option value="structure" selected>Structure</option><option value="envelope">Envelope / facade</option><option value="finishes">Finishes</option><option value="commissioning">Commissioning</option></select></div>
+          <div class="riskfield"><label for="riskPlanned">Planned progress (%)</label><input class="csvinput" id="riskPlanned" type="number" min="0" max="100" step="0.1" value="65" required></div>
+          <div class="riskfield"><label for="riskActual">Actual progress (%)</label><input class="csvinput" id="riskActual" type="number" min="0" max="100" step="0.1" value="54" required></div>
+          <div class="riskfield"><label for="riskBudget">Budget variance (%)</label><input class="csvinput" id="riskBudget" type="number" min="-100" max="500" step="0.1" value="8" required></div>
+          <div class="riskfield"><label for="riskVendor">Vendor delay (days)</label><input class="csvinput" id="riskVendor" type="number" min="0" max="365" value="14" required></div>
+          <div class="riskfield"><label for="riskIssues">Open issues</label><input class="csvinput" id="riskIssues" type="number" min="0" max="10000" value="12" required></div>
+          <div class="riskfield"><label for="riskDefects">Quality defects</label><input class="csvinput" id="riskDefects" type="number" min="0" max="10000" value="4" required></div>
+          <div class="riskfield"><label for="riskFloat">Remaining total float (days)</label><input class="csvinput" id="riskFloat" type="number" min="-365" max="365" value="7" required></div>
+          <div class="riskfield"><label for="riskFloatUsed">Baseline float consumed (%)</label><input class="csvinput" id="riskFloatUsed" type="number" min="0" max="1000" step="0.1" value="78" required></div>
+          <div class="riskfield"><label for="riskProcurement">Procurement delay (days)</label><input class="csvinput" id="riskProcurement" type="number" min="0" max="365" value="12" required></div>
+          <div class="riskfield"><label for="riskLongLead">Long-lead items at risk</label><input class="csvinput" id="riskLongLead" type="number" min="0" max="500" value="3" required></div>
+          <div class="riskfield"><label for="riskApproval">Overdue approvals (days)</label><input class="csvinput" id="riskApproval" type="number" min="0" max="365" value="9" required></div>
+          <div class="riskfield"><label for="riskLabour">Labour shortage (%)</label><input class="csvinput" id="riskLabour" type="number" min="0" max="100" step="0.1" value="25" required></div>
+          <div class="riskfield"><label for="riskWeather">Weather-lost days (last 30d)</label><input class="csvinput" id="riskWeather" type="number" min="0" max="90" value="3" required></div>
+          <div class="riskfield"><label for="riskChanges">Design changes (last 30d)</label><input class="csvinput" id="riskChanges" type="number" min="0" max="365" value="2" required></div>
+          <div class="riskfield"><label for="riskSafety">Overdue safety actions</label><input class="csvinput" id="riskSafety" type="number" min="0" max="1000" value="2" required></div>
+        </div>
+        <div class="csvbuttons"><button id="runRiskModelButton" class="btn btn-primary" type="submit">Estimate synthetic risk →</button></div>
+      </form>
+      <div id="riskModelStatus" class="csvstatus" role="status" aria-live="polite">Illustrative values are prefilled so you can test the model flow. Replace them only with synthetic or approved non-confidential data.</div>
+      <div id="riskModelOutput" hidden>
+        <div id="riskModelSummary" class="riskresultgrid"></div>
+        <div class="csvbox" style="margin-top:12px"><strong style="font-size:11px">Largest positive model associations</strong><div class="csvsmall" style="margin-top:4px">These are additive associations within the fitted model, not causal explanations.</div><div id="riskModelDrivers"></div></div>
+        <div id="riskModelDisclaimer" class="csvsmall" style="margin-top:10px"></div>
+      </div>
+    </div>
+  </section>
+
+  <div style="height:16px"></div>
   <section class="footgrid">
     <div class="panel"><div class="panelhead"><h3>How this could fit a real project stack</h3><span class="index">05 / ARCHITECTURE</span></div><div class="panelbody"><ol class="listclean"><li><strong style="color:#e4edf5">Ingest (future adapter):</strong> milestone dates and activity links from an approved schedule export; issue and procurement status from allowed data sources.</li><li><strong style="color:#e4edf5">Normalize:</strong> align IDs, calendars, owners, status timestamps and dependencies; quarantine stale or incomplete records.</li><li><strong style="color:#e4edf5">Simulate:</strong> propagate a disruption through the dependency graph and compare the original plan against plausible interventions.</li><li><strong style="color:#e4edf5">Explain:</strong> show the critical chain, affected successors, estimated recovery, assumed cost and reasons behind the ranking.</li><li><strong style="color:#e4edf5">Govern:</strong> project owner reviews the evidence and action. Log assumptions, version and approval; never auto-approve construction or regulatory decisions.</li></ol></div></div>
-    <div class="panel"><div class="panelhead"><h3>Model card & guardrails</h3><span class="index">06 / TRUST</span></div><div class="panelbody"><ul class="listclean"><li><strong style="color:#e4edf5">Method:</strong> deterministic dependency graph + longest-path schedule propagation; scenario search across a small set of illustrative recovery actions.</li><li><strong style="color:#e4edf5">Not claimed:</strong> no learned delay probability, no causal proof, no Autodesk / Primavera connection and no access to Prestige data.</li><li><strong style="color:#e4edf5">Needed for validation:</strong> approved activity histories, working calendars, resource constraints, intervention cost ranges and actual planned/actual completion outcomes.</li><li><strong style="color:#e4edf5">Before a pilot:</strong> test against historic projects, report error and sensitivity, review false alerts, verify security / access control, and retain human sign-off.</li></ul></div></div>
+    <div class="panel"><div class="panelhead"><h3>Model card & guardrails</h3><span class="index">06 / TRUST</span></div><div class="panelbody"><ul class="listclean"><li><strong style="color:#e4edf5">Method:</strong> deterministic dependency graph + longest-path schedule propagation; scenario search across a small set of illustrative recovery actions.</li><li><strong style="color:#e4edf5">Not claimed:</strong> no real-world calibrated delay probability. The trained model learns synthetic labels only; no causal proof, no Autodesk / Primavera connection and no access to Prestige data.</li><li><strong style="color:#e4edf5">Needed for validation:</strong> approved activity histories, working calendars, resource constraints, intervention cost ranges and actual planned/actual completion outcomes.</li><li><strong style="color:#e4edf5">Before a pilot:</strong> test against historic projects, report error and sensitivity, review false alerts, verify security / access control, and retain human sign-off.</li></ul></div></div>
   </section>
   <footer class="footer"><span>PROJECT IMPACT LAB · Student proof of concept · Synthetic data</span><span>Concept: a decision-rehearsal layer above existing systems, not a replacement</span></footer>
 </div>
@@ -570,6 +621,114 @@ runCsvScenarioButton.addEventListener('click',function(){
 });
 
 loadCatalog().then(recalculate).catch(function(error){setError(error.message+' Start the API with: uvicorn app.main:app --reload');});
+
+
+
+function renderRiskModelMetrics(info){
+  var metrics=info.test_metrics||{};
+  var source=info.data_source==='synthetic_generator'?'Synthetic generator':'Approved labelled CSV';
+  var cards=[
+    [Number(info.dataset_rows||0).toLocaleString(), 'Training rows · '+source],
+    [metrics.roc_auc==null?'—':Number(metrics.roc_auc).toFixed(3), 'Test ROC-AUC · ranking only'],
+    [metrics.brier_score==null?'—':Number(metrics.brier_score).toFixed(3), 'Test Brier score · lower is better'],
+    [metrics.precision_at_0_5==null?'—':(Number(metrics.precision_at_0_5)*100).toFixed(1)+'%', 'Precision at 0.50 score threshold']
+  ];
+  document.getElementById('riskModelMetrics').innerHTML=cards.map(function(card){
+    return '<div class="riskmetric"><strong>'+safeText(card[0])+'</strong><span>'+safeText(card[1])+'</span></div>';
+  }).join('');
+  document.getElementById('riskModelMetrics').innerHTML += '<div class="csvsmall" style="grid-column:1/-1">Test holdout: '+safeText(String((info.split_rows||{}).test||'—'))+' snapshots. Evaluation scope: '+safeText(info.data_source==='synthetic_generator'?'synthetic holdout only':'project-group holdout from supplied labelled data')+'. ROC-AUC is not probability calibration.</div>';
+}
+async function loadRiskModelMetrics(){
+  try{
+    var response=await fetch('/api/risk/model-info');
+    var body=await response.json();
+    if(!response.ok) throw new Error('Could not load model metadata.');
+    renderRiskModelMetrics(body);
+  }catch(error){
+    document.getElementById('riskModelMetrics').textContent='Model metadata is unavailable: '+error.message;
+  }
+}
+function riskNumber(id){return Number(document.getElementById(id).value);}
+function renderRiskModelOutcome(data){
+  var output=document.getElementById('riskModelOutput');
+  var status=document.getElementById('riskModelStatus');
+  output.hidden=false;
+  if(!data.score_available){
+    document.getElementById('riskModelSummary').innerHTML='';
+    document.getElementById('riskModelDrivers').textContent='No score returned.';
+    var reasons=[];
+    if((data.missing_optional_fields||[]).length) reasons.push('Missing inputs: '+data.missing_optional_fields.join(', ')+'.');
+    if((data.out_of_training_range_fields||[]).length) reasons.push('Outside training support: '+data.out_of_training_range_fields.join(', ')+'.');
+    status.className='csvstatus error';
+    status.textContent='Score withheld by design. '+reasons.join(' ')+' Provide more complete values or train and evaluate the model on approved labelled data representative of these ranges.';
+    document.getElementById('riskModelDisclaimer').textContent=data.interpretation_warning||'No score should be used for project decisions.';
+    return;
+  }
+  status.className='csvstatus success';
+  status.textContent='Model returned a synthetic-only research score. Do not use it as a real-world probability or an approved decision.';
+  var metric=data.test_metrics||{};
+  var cards=[
+    [''+Number(data.synthetic_model_probability_pct).toFixed(1)+'%','Synthetic-model score · not Prestige-calibrated'],
+    [safeText(data.risk_band),'Illustrative model band'],
+    [Number(data.data_completeness_pct).toFixed(1)+'%','Input completeness'],
+    [metric.roc_auc==null?'—':Number(metric.roc_auc).toFixed(3),'Synthetic / pilot test ROC-AUC']
+  ];
+  document.getElementById('riskModelSummary').innerHTML=cards.map(function(card){
+    return '<div class="riskmetric"><strong>'+safeText(card[0])+'</strong><span>'+safeText(card[1])+'</span></div>';
+  }).join('');
+  var contributors=data.top_model_contributors||[];
+  document.getElementById('riskModelDrivers').innerHTML=contributors.length?contributors.map(function(item){
+    return '<div class="riskdriver"><strong>'+safeText(item.label)+'</strong><div class="csvsmall">Model contribution: '+Number(item.contribution_log_odds).toFixed(3)+' log-odds relative to the training mean; not a causal effect.</div></div>';
+  }).join(''):'No positive above-reference model associations were returned.';
+  document.getElementById('riskModelDisclaimer').textContent=data.interpretation_warning||'Experimental score; require human review.';
+}
+document.getElementById('riskModelForm').addEventListener('submit',async function(event){
+  event.preventDefault();
+  var button=document.getElementById('runRiskModelButton');
+  var status=document.getElementById('riskModelStatus');
+  if(!this.reportValidity()) return;
+  button.disabled=true;
+  button.textContent='Scoring synthetic snapshot…';
+  status.className='csvstatus';
+  status.textContent='Calculating the model score and checking input support…';
+  var payload={
+    project_id:document.getElementById('riskProjectId').value.trim(),
+    phase:document.getElementById('riskPhase').value,
+    planned_progress:riskNumber('riskPlanned'),
+    actual_progress:riskNumber('riskActual'),
+    budget_variance_pct:riskNumber('riskBudget'),
+    vendor_delay_days:riskNumber('riskVendor'),
+    open_issues:riskNumber('riskIssues'),
+    quality_defects:riskNumber('riskDefects'),
+    total_float_days:riskNumber('riskFloat'),
+    float_consumed_pct:riskNumber('riskFloatUsed'),
+    procurement_delay_days:riskNumber('riskProcurement'),
+    long_lead_items_at_risk:riskNumber('riskLongLead'),
+    approval_overdue_days:riskNumber('riskApproval'),
+    labour_shortage_pct:riskNumber('riskLabour'),
+    weather_lost_days_30d:riskNumber('riskWeather'),
+    design_changes_30d:riskNumber('riskChanges'),
+    safety_actions_overdue:riskNumber('riskSafety')
+  };
+  try{
+    var response=await fetch('/api/risk/predict',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    var body=await response.json();
+    if(!response.ok){
+      var detail=body.detail;
+      throw new Error(Array.isArray(detail)?detail.map(function(x){return x.msg;}).join('; '):(detail||'Risk prediction failed.'));
+    }
+    renderRiskModelOutcome(body);
+  }catch(error){
+    status.className='csvstatus error';
+    status.textContent=error.message||'Risk prediction failed.';
+    document.getElementById('riskModelOutput').hidden=true;
+  }finally{
+    button.disabled=false;
+    button.textContent='Estimate synthetic risk →';
+  }
+});
+loadRiskModelMetrics();
+
 </script>
 </body>
 </html>
