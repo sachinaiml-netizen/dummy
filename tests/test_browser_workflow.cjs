@@ -66,6 +66,30 @@ async function main() {
     );
     assert.equal(await page.locator("#kpiSlip").innerText(), "+1d");
 
+    // Evaluate the separate synthetic-risk model; verify a stressed and a healthy input.
+    await page.locator("#runRiskModelButton").click();
+    await page.waitForFunction(() =>
+      document.querySelector("#riskModelStatus")?.textContent.includes("Experimental result ready") &&
+      document.querySelector("#riskModelOutput")?.hidden === false
+    );
+    assert.match(await page.locator("#riskModelVersion").innerText(), /0\.1\.0-synthetic/);
+    assert.equal((await page.locator("#riskModelBand").innerText()).trim(), "HIGH");
+    assert.ok(parseFloat(await page.locator("#riskModelProbability").innerText()) > 90);
+    assert.ok((await page.locator("#riskModelWarnings").innerText()).includes("not trained on Prestige data"));
+
+    await page.locator("#riskPlannedProgress").fill("50");
+    await page.locator("#riskActualProgress").fill("49");
+    await page.locator("#riskBudgetVariance").fill("1");
+    await page.locator("#riskVendorDelay").fill("0");
+    await page.locator("#riskOpenIssues").fill("1");
+    await page.locator("#riskQualityDefects").fill("0");
+    await page.locator("#runRiskModelButton").click();
+    await page.waitForFunction(() =>
+      document.querySelector("#riskModelStatus")?.textContent.includes("Experimental result ready") &&
+      document.querySelector("#riskModelBand")?.textContent === "LOW"
+    );
+    assert.ok(parseFloat(await page.locator("#riskModelProbability").innerText()) < 10);
+
     // Download the app's own fixture, then upload those exact bytes through the real file input.
     const sampleResponse = await page.request.get(baseUrl + "/sample-schedule.csv");
     assert.equal(sampleResponse.status(), 200);
