@@ -1,10 +1,11 @@
 const assert = require("node:assert/strict");
+const fs = require("node:fs");
 const { spawn } = require("node:child_process");
 const { chromium } = require("playwright");
 
 const host = "127.0.0.1";
 const port = 8765;
-const baseUrl = \`http://\${host}:\${port}\`;
+const baseUrl = "http://" + host + ":" + port;
 const server = spawn(
   process.env.PYTHON || "python",
   ["-m", "uvicorn", "app.main:app", "--host", host, "--port", String(port)],
@@ -19,17 +20,17 @@ async function waitForServer(timeoutMs = 20000) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     if (server.exitCode !== null) {
-      throw new Error(\`FastAPI exited before becoming ready.\\n\${serverOutput}\`);
+      throw new Error("FastAPI exited before becoming ready.\n" + serverOutput);
     }
     try {
-      const response = await fetch(\`\${baseUrl}/health\`);
+      const response = await fetch(baseUrl + "/health");
       if (response.ok) return;
     } catch (_) {
       // The local server may need a few seconds to bind its port.
     }
     await new Promise((resolve) => setTimeout(resolve, 250));
   }
-  throw new Error(\`FastAPI did not become ready.\\n\${serverOutput}\`);
+  throw new Error("FastAPI did not become ready.\n" + serverOutput);
 }
 
 async function main() {
@@ -66,7 +67,7 @@ async function main() {
     assert.equal(await page.locator("#kpiSlip").innerText(), "+1d");
 
     // Download the app's own fixture, then upload those exact bytes through the real file input.
-    const sampleResponse = await page.request.get(\`\${baseUrl}/sample-schedule.csv\`);
+    const sampleResponse = await page.request.get(baseUrl + "/sample-schedule.csv");
     assert.equal(sampleResponse.status(), 200);
     assert.match(sampleResponse.headers()["content-type"], /text\/csv/);
     const sampleCsv = await sampleResponse.text();
@@ -96,14 +97,13 @@ async function main() {
     assert.equal((await page.locator("#csvSlip").innerText()).trim(), "0d");
     assert.ok((await page.locator("#csvKeyInsight").innerText()).includes("1 day(s) remain"));
 
-    const [download] = await Promise.all([
-      page.waitForEvent("download"),
-      page.locator("#downloadCsvBriefButton").click()
-    ]);
+    const downloadPromise = page.waitForEvent("download");
+    await page.locator("#downloadCsvBriefButton").click();
+    const download = await downloadPromise;
     assert.equal(download.suggestedFilename(), "project-impact-lab-decision-brief.txt");
     const downloadPath = await download.path();
     assert.ok(downloadPath, "Decision brief should be downloaded to a temporary file");
-    const brief = require("node:fs").readFileSync(downloadPath, "utf8");
+    const brief = fs.readFileSync(downloadPath, "utf8");
     for (const expected of [
       "PROJECT IMPACT LAB — DECISION BRIEF",
       "Activities analysed: 8",
@@ -118,11 +118,11 @@ async function main() {
       "This model uses finish-to-start links",
       "Imported schedules are not saved by the application"
     ]) {
-      assert.ok(brief.includes(expected), \`Downloaded brief missing expected text: \${expected}\`);
+      assert.ok(brief.includes(expected), "Downloaded brief missing expected text: " + expected);
     }
 
     // Verify CSV-provided HTML is rendered as text, not executable markup.
-    const hostileCsv = 'task_id,task_name,duration_days,predecessors\\nA,"<img src=x onerror=window.__xss=1>",2,\\n';
+    const hostileCsv = 'task_id,task_name,duration_days,predecessors\nA,"<img src=x onerror=window.__xss=1>",2,\n';
     await page.locator("#csvFile").setInputFiles({
       name: "label-escaping-check.csv",
       mimeType: "text/csv",
@@ -138,7 +138,7 @@ async function main() {
     assert.equal(await page.locator("#csvTaskRows img").count(), 0, "CSV task names must not create HTML elements");
     assert.equal(await page.evaluate(() => window.__xss || false), false, "CSV task names must not execute script");
 
-    assert.deepEqual(pageErrors, [], \`Unexpected browser exceptions: \${pageErrors.join("; ")}\`);
+    assert.deepEqual(pageErrors, [], "Unexpected browser exceptions: " + pageErrors.join("; "));
     console.log("Browser E2E passed: threshold boundaries, sample download/upload, CSV analysis, decision-brief download/content, and safe task-name rendering.");
   } finally {
     if (browser) await browser.close();
