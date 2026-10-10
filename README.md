@@ -37,7 +37,7 @@ The app accepts a small, documented CSV adapter format so a user can inspect a t
 
 Required columns: `task_id`, `task_name`, `duration_days`, and `predecessors`. Optional columns: `owner` and `stream`. Multiple predecessor IDs are separated with `|`, for example `A-01|B-02`. Current limits are 250,000 characters, 2,000 activities, task IDs up to 80 characters, and scenario delays from 0 to 60 whole days. Empty rows are ignored; duplicate headers/IDs, missing columns, invalid durations, missing predecessor IDs, cycles, and a disruption ID absent from the CSV are rejected.
 
-This is **not** a native Primavera P6 XER/XML parser or live integration. Oracle documents P6 XML/XER as its exchange formats; this prototype needs a mapped CSV export in its own schema. The API checks graph structure but does not validate working calendars, actuals, lags, resources, contract terms or site conditions. Use synthetic or non-confidential data. The app does not save imported schedules in an application database, but this is not a certified secure data-ingestion service.
+This is **not** a native Primavera P6 XER/XML parser or live integration. Oracle documents P6 XML/XER as its exchange formats; this prototype needs a mapped CSV export in its own schema. The API checks graph structure but does not validate working calendars, actuals, lags, resources, contract terms or site conditions. CSV contents are sent to this app's API for validation and calculation. Imported schedules are not persisted in an application database, but that is not a confidentiality or host/provider non-retention guarantee, and this is not a certified secure data-ingestion service. Use synthetic or approved non-confidential data.
 
 ## Why this is a more useful interview demonstration
 
