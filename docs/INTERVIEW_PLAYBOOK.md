@@ -10,7 +10,7 @@ This is the core problem; do not start with AI or the dashboard. AI is not the e
 
 “I started with an AI project-risk dashboard, then noticed that risk dashboards already exist in construction software. I changed the question: when an activity is delayed, does it actually move the project handover date, and which recovery action is worth paying for? Project Impact Lab models a dependency network, injects a delay, propagates the effect to dependent work, then compares candidate actions using transparent cost assumptions. Everything in this demo is synthetic. I want to validate whether this decision-rehearsal layer would be useful on approved historical schedules.”
 
-Do not call it a trained prediction model. The current decision engine is a deterministic critical-path simulator.
+Do not call the schedule/finish-date engine a trained prediction model: it remains deterministic CPM. A separate experimental /risk-model classifier is trained on generated synthetic labels only. Its score is not calibrated to real construction outcomes or Prestige data.
 
 ## The demo's strongest, easiest-to-explain case
 
@@ -82,7 +82,7 @@ Only do this if the primary one-click threshold demo has already worked.
 
 ### “Where is the AI?”
 
-“In this version, the decision engine is not an AI model; it is deterministic graph and critical-path logic. That is deliberate because I have no authorized, labelled Prestige project history to train or validate a model. The separate /risk endpoint uses a bounded, deterministic rule-based deviation indicator, not an ML anomaly detector or a probability. I removed the synthetic Isolation Forest because a model fitted to generated 'normal' data gives no evidence of real-world validity and adds substantial deployment dependencies. With permissioned historical data, I would first build a schedule-variance baseline, use time-aware validation, and test whether ML improves decision quality over that baseline.”
+“The handover and recovery calculation is deterministic CPM, not ML. I also built a separate experimental logistic-regression classifier to practise the end-to-end ML workflow. It trains on 70,000 generated samples and is evaluated on separate synthetic test data, but the labels come from an authored simulator—not observed project outcomes. The reported percentage is only a probability of that synthetic label, not the probability that a real project will be delayed. I would not use it for Prestige decisions. With permissioned historic snapshots and verified future outcomes, I would compare it with simple baselines using project- and time-separated tests, calibration, recall/precision and drift checks.”
 
 ### “How does the calculation work?”
 
@@ -124,7 +124,7 @@ Only do this if the primary one-click threshold demo has already worked.
 - Recovery days and action costs are assumed.
 - There is no live integration with Autodesk, Primavera, ERP or RERA.
 - The legacy snapshot-risk route is a weighted heuristic; its field named `anomaly_score` is a compatibility label for a bounded rule-based indicator.
-- The app is not a trained, validated delay-prediction model.
+- The CPM schedule engine is deterministic. The separate /risk-model is trained on 70,000 synthetic labels but is not validated or calibrated against real project delays.
 - The value estimate is sensitive to the daily-exposure assumption.
 
 Showing that you understand these limits is stronger than overclaiming.
