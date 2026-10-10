@@ -442,6 +442,14 @@ function renderCsvResult(result){
   });
   document.getElementById('csvTaskRows').innerHTML=rows;
 }
+function inlineReportText(value){
+  // User-controlled schedule labels can contain newlines/control characters.
+  // Collapse them to one safe inline value so they cannot forge report sections.
+  return String(value == null ? '' : value)
+    .replace(/[\u0000-\u001f\u007f-\u009f\u2028\u2029]+/g,' ')
+    .replace(/\s+/g,' ')
+    .trim();
+}
 function buildCsvDecisionBrief(result){
   var activities=result.activities || [];
   var disrupted=result.disrupted_task_id
@@ -450,7 +458,7 @@ function buildCsvDecisionBrief(result){
   function pathLines(label, paths){
     var output=[label+':'];
     (paths || []).forEach(function(path,index){
-      output.push('  CP'+(index+1)+': '+path.join(' -> '));
+      output.push('  CP'+(index+1)+': '+path.map(inlineReportText).join(' -> '));
     });
     if(!paths || !paths.length) output.push('  None returned.');
     return output;
@@ -461,38 +469,38 @@ function buildCsvDecisionBrief(result){
         task.baseline_total_float_days>0 && task.scenario_total_float_days<=3
           ? 'Near-critical'
           : 'Buffer available'));
-    return task.task_id+' — '+task.task_name+
-      ' | finish: Day '+task.baseline_early_finish_day+' -> Day '+task.scenario_early_finish_day+
-      ' | total float: '+task.baseline_total_float_days+'d -> '+task.scenario_total_float_days+'d'+
+    return inlineReportText(task.task_id)+' — '+inlineReportText(task.task_name)+
+      ' | finish: Day '+inlineReportText(task.baseline_early_finish_day)+' -> Day '+inlineReportText(task.scenario_early_finish_day)+
+      ' | total float: '+inlineReportText(task.baseline_total_float_days)+'d -> '+inlineReportText(task.scenario_total_float_days)+'d'+
       ' | '+signal;
   });
   var disruptionLines=disrupted
-    ? ['Activity: '+disrupted.task_id+' — '+disrupted.task_name,
-       'Added delay: '+result.delay_days+' day(s)',
-       'Total float: '+result.disrupted_task_baseline_total_float_days+'d -> '+result.disrupted_task_scenario_total_float_days+'d',
-       'Float consumed: '+result.disrupted_task_float_consumed_days+' day(s)']
+    ? ['Activity: '+inlineReportText(disrupted.task_id)+' — '+inlineReportText(disrupted.task_name),
+       'Added delay: '+inlineReportText(result.delay_days)+' day(s)',
+       'Total float: '+inlineReportText(result.disrupted_task_baseline_total_float_days)+'d -> '+inlineReportText(result.disrupted_task_scenario_total_float_days)+'d',
+       'Float consumed: '+inlineReportText(result.disrupted_task_float_consumed_days)+' day(s)']
     : ['Activity delay: none (baseline validation only).'];
   return [
     'PROJECT IMPACT LAB — DECISION BRIEF',
-    'Generated: '+new Date().toLocaleString(),
+    'Generated: '+inlineReportText(new Date().toLocaleString()),
     '',
     'PURPOSE',
     'A deterministic critical-path what-if analysis of a user-supplied CSV schedule.',
     'This is a scenario, not a prediction, approved recovery plan, or guarantee.',
     '',
     'INPUT',
-    'Activities analysed: '+result.activity_count,
+    'Activities analysed: '+inlineReportText(result.activity_count),
     'Disruption:',
     ...disruptionLines,
     '',
     'PROJECT-FINISH EFFECT',
-    'Baseline finish: Day '+result.baseline_finish_day,
-    'Scenario finish: Day '+result.scenario_finish_day,
-    'Handover slip: '+result.handover_slip_days+' day(s)',
-    'Critical paths: '+result.baseline_critical_path_count+' baseline; '+result.scenario_critical_path_count+' in scenario',
+    'Baseline finish: Day '+inlineReportText(result.baseline_finish_day),
+    'Scenario finish: Day '+inlineReportText(result.scenario_finish_day),
+    'Handover slip: '+inlineReportText(result.handover_slip_days)+' day(s)',
+    'Critical paths: '+inlineReportText(result.baseline_critical_path_count)+' baseline; '+inlineReportText(result.scenario_critical_path_count)+' in scenario',
     '',
     'KEY INTERPRETATION',
-    result.key_insight,
+    inlineReportText(result.key_insight),
     '',
     ...pathLines('BASELINE CRITICAL PATHS',result.baseline_critical_paths),
     ...pathLines('SCENARIO CRITICAL PATHS',result.scenario_critical_paths),
@@ -502,8 +510,8 @@ function buildCsvDecisionBrief(result){
     ...trace,
     '',
     'VALIDATION SCOPE',
-    result.validation_scope || 'Task dependencies and durations were validated by the schedule analyzer.',
-    result.format_note || '',
+    inlineReportText(result.validation_scope || 'Task dependencies and durations were validated by the schedule analyzer.'),
+    inlineReportText(result.format_note || ''),
     '',
     'IMPORTANT LIMITS',
     'This model uses finish-to-start links and durations. It does not evaluate working calendars, lags, resources, contracts, regulatory approvals, or site conditions.',
