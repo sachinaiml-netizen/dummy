@@ -240,7 +240,8 @@ def test_dashboard_defaults_to_the_same_procurement_threshold_scenario():
     page = response.text
     assert "activitySelect.value = catalog.activities.some(function(task){return task.id==='PR-01';})" in page
     assert 'id="float14Case"' in page
-    assert "Procurement has 15 days" not in page  # copy uses lower-case 'procurement'; no case-sensitive mismatch
+    assert "procurement has 15 days of total float" in page
+    assert "leaves only one day of buffer" in page
 
 
 
