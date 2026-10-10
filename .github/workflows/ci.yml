@@ -29,4 +29,6 @@ jobs:
           Path("/tmp/project-impact-lab-dashboard.js").write_text("\n".join(scripts), encoding="utf-8")
           PY
           node --check /tmp/project-impact-lab-dashboard.js
+      - name: Test decision brief output with a valid schedule result
+        run: node tests/test_decision_brief.js
       - run: python -m pytest -q
