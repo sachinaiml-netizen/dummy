@@ -18,8 +18,9 @@ The current feature is called **Float-Burn Watch**: it demonstrates how an activ
 - **Synthetic task catalog:** https://project-impact-lab.vercel.app/api/catalog
 - **CSV sample template:** https://project-impact-lab.vercel.app/sample-schedule.csv
 - **CSV analysis endpoint:** `POST https://project-impact-lab.vercel.app/api/schedule/analyze-csv`
+- **Risk proof-model endpoint (after release):** `POST https://project-impact-lab.vercel.app/api/risk/proof-model`
 
-The public dashboard, `/health`, `/api/scenario`, `/api/catalog`, `/sample-schedule.csv`, and `/openapi.json` were checked after deployment on 2026-10-09. The default scenario response returns baseline handover Day 119, no-action handover Day 133, and the explicitly illustrative structural recovery option. The CSV POST route is present in the live OpenAPI document; CSV calculations and malformed-input handling passed automated CI. An external live POST was not executed during this iteration.
+The public dashboard and API routes have been smoke-tested across prior iterations. The default scenario is the procurement float-burn case: baseline and scenario handover both Day 119 after a +14-day procurement delay, with 1 day of modelled float remaining. The risk proof-model endpoint is a new branch change and is not live until the PR is merged and redeployed.
 
 **Deployment limitation:** the Vercel deployment is currently a manual source upload. The connected Vercel account did not have a GitHub Login Connection, so Vercel is not linked to this repository and future pushes to main will not automatically deploy. Re-deploy the latest main source or establish the GitHub connection in Vercel before relying on automatic releases. No database, custom domain, secret, or paid add-on was configured; the connected account's full billing/plan status was not readable through the available connection.
 
@@ -60,7 +61,32 @@ These are deterministic examples built from made-up durations, dependencies, act
 - One-click demo presets for the 14/15/16-day float threshold and a structural recovery comparison, so the interview demo does not rely on manual slider positioning.
 - CSV schedule intake with server-side checks for required columns, duplicate IDs, durations, predecessor references and dependency cycles; accepted CSV schedules can be tested with a delay and inspected for float/critical-path changes.
 - Pydantic input validation and tests for critical-path impact, schedule float, tied paths, non-topological input order, cycles, unknown predecessors, invalid durations and bounded critical-path output.
-- Legacy /risk endpoint retained with a transparent rule-based snapshot score and bounded deviation indicator; it does not claim to run an ML anomaly detector.
+- Legacy `POST /risk` endpoint retained with a transparent rule-based snapshot score and bounded deviation indicator.
+- Separate synthetic-trained logistic-regression proof model with 60,000 generated examples, a held-out test set, input-level contributions and an explicit synthetic-data warning.
+
+## Synthetic-trained risk proof model
+
+A separate research baseline now trains a standardized logistic-regression model on **60,000 reproducibly generated synthetic snapshots**. The dataset is split into 42,000 training, 9,000 validation and 9,000 test examples. The checked-in artifact is `app/risk_model.json`; the no-third-party-dependency training script is `scripts/train_risk_model.py`. The browser form sends the current telemetry snapshot to `POST /api/risk/proof-model` and shows the model score plus the largest feature contributions.
+
+Synthetic holdout metrics for the current artifact: ROC-AUC **0.7961**, accuracy **0.7402**, precision **0.7073**, recall **0.5658**, and Brier score **0.1744** at a 0.5 classification threshold. The majority-class accuracy baseline is **0.6113**. These results measure recovery of an invented synthetic label from the same data generator. **They do not estimate accuracy on real construction projects, are not calibrated probabilities for an actual event, and must not be used for project decisions.**
+
+### Retrain or adapt with labelled historical data
+
+The optional CSV mode requires these columns:
+
+`project_id,snapshot_date,planned_progress,actual_progress,budget_variance_pct,vendor_delay_days,open_issues,quality_defects,target_high_risk_30d`
+
+The target must be an observed, agreed outcome after the snapshot—e.g. a project-controls-defined adverse event within the next 30 days. The trainer does not invent real labels from telemetry. It uses chronological train/validation/test partitions with a 30-day embargo by default and excludes project IDs from model features. It requires at least 12 distinct dates, enough rows in each partition, and both target classes.
+
+Synthetic reproduction:
+
+    python scripts/train_risk_model.py --rows 60000 --seed 20261010 --output /tmp/risk-model.json
+
+Candidate training on approved labeled history:
+
+    python scripts/train_risk_model.py --input-csv approved_labeled_snapshots.csv --model-version pilot-candidate-01 --output /tmp/risk-model-candidate.json
+
+A candidate file is not automatically loaded by the public app. Review data rights, target definition, holdout metrics, calibration, class-specific errors and subgroups before an authorised release. Do not commit confidential project data or a real-trained model artifact to this public repository unless approved.
 
 ## Architecture
 
@@ -113,9 +139,10 @@ Open http://127.0.0.1:8000 for the dashboard and http://127.0.0.1:8000/docs for 
 | GET | /api/catalog | Synthetic task and intervention catalog |
 | GET | /sample-schedule.csv | Download the synthetic CSV adapter example |
 | POST | /api/schedule/analyze-csv | Validate a CSV network and compute baseline / one-delay CPM output |
-| GET | /api/scenario | Default structural-delay scenario |
+| GET | /api/scenario | Default procurement float-burn scenario (+14 days) |
 | POST | /api/scenario | Recompute impact for a supplied scenario |
-| POST | /risk | Legacy telemetry-based risk-score prototype |
+| POST | /risk | Legacy transparent rule-based telemetry score |
+| POST | /api/risk/proof-model | Synthetic-trained risk-model research baseline; not operationally validated |
 
 Example request to POST /api/scenario:
 
@@ -140,12 +167,14 @@ This matches the core CPM concepts documented by Oracle Primavera Cloud, which d
 
 ## Model card and limits
 
-- The decision engine is a **deterministic critical-path simulation**, not a trained delay-prediction model and not a causal model.
+- The schedule decision engine is a **deterministic critical-path simulation**, not a trained delay-prediction model or causal model.
+- The separate risk proof model is a trained logistic-regression baseline. Its current artifact is trained on synthetic telemetry and an invented target; a good synthetic holdout score does not show real-world generalization.
 - The synthetic network has eight activities and simplified finish-to-start dependencies. It does not model working calendars, lag types, resource levelling, weather calendars, cash-flow, contract terms, uncertainty distributions or change orders.
 - Intervention durations and costs are fixed illustrative assumptions. A real use case would require feasible alternatives approved by delivery teams and current cost inputs.
 - Production requirements contain only FastAPI runtime dependencies; pytest and HTTPX live in `requirements-dev.txt` so they are not shipped with the public function.
 - The recommendation stability panel varies the injected delay by ±4 days and the daily-exposure assumption by ±25% in a small deterministic grid. It is a sensitivity check, not a probability estimate, confidence interval, Monte Carlo run or proof of robustness beyond the tested range.
-- The legacy /risk endpoint uses a transparent rule-based weighted snapshot score. Its field named `anomaly_score` is retained for API compatibility but contains a bounded heuristic deviation index—not an ML output, statistical anomaly score, or probability. Its weights and reference ranges are illustrative and unvalidated.
+- The legacy `/risk` endpoint uses a transparent rule-based weighted snapshot score. Its field named `anomaly_score` is retained for API compatibility but contains a bounded heuristic deviation index—not an ML output, statistical anomaly score, or probability. Its weights and reference ranges are illustrative and unvalidated.
+- The trained risk proof model uses six current-state features. Its score and LOW/MEDIUM/HIGH bands are provisional synthetic-model outputs, not real construction-event probabilities or calibrated thresholds.
 - No Prestige internal data or live Autodesk / Primavera / ERP / RERA connection is used. All project tasks and values are generic synthetic examples.
 - A credible pilot would need permissioned schedule histories, stable task IDs, source timestamps, project calendars, actual planned/actual outcomes, back-testing, drift/error monitoring, access controls and human sign-off.
 
