@@ -86,7 +86,9 @@ Candidate training on approved labeled history:
 
     python scripts/train_risk_model.py --input-csv approved_labeled_snapshots.csv --model-version pilot-candidate-01 --output /tmp/risk-model-candidate.json
 
-A candidate file is not automatically loaded by the public app. Review data rights, target definition, holdout metrics, calibration, class-specific errors and subgroups before an authorised release. Do not commit confidential project data or a real-trained model artifact to this public repository unless approved.
+A candidate file is not automatically loaded by the public app; the trainer also refuses to overwrite the serving proof artifact when --input-csv is supplied. Review data rights, target definition, holdout metrics, calibration, class-specific errors and subgroups before an authorised release. Do not commit confidential project data or a real-trained model artifact to this public repository unless explicitly approved.
+
+The current CSV splitter is a chronological holdout for future reporting periods and applies an embargo around the 30-day outcome horizon. The same project may have earlier snapshots in training and later snapshots in test. This probes future-period performance within a portfolio, not generalisation to unseen projects; for that use case, add a separate project-held-out evaluation before any pilot.
 
 ## Architecture
 
