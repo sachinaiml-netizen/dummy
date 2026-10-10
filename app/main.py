@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
 
 from .decision_engine import analyze_schedule_csv, get_catalog, simulate_project
 from .risk import assess_risk
@@ -19,11 +19,11 @@ app = FastAPI(
 FRONTEND_FILE = Path(__file__).resolve().parent.parent / "static" / "index.html"
 
 
-@app.get("/")
+@app.get("/", response_class=HTMLResponse)
 def home():
     if not FRONTEND_FILE.exists():
         raise HTTPException(status_code=404, detail="Frontend file is missing.")
-    return FileResponse(FRONTEND_FILE)
+    return FileResponse(FRONTEND_FILE, media_type="text/html")
 
 
 @app.get("/health")
@@ -54,7 +54,20 @@ def scenario(request: ScenarioRequest):
 
 
 
-@app.get("/sample-schedule.csv")
+@app.get(
+    "/sample-schedule.csv",
+    response_class=FileResponse,
+    responses={
+        200: {
+            "description": "Download the sample CSV schedule template.",
+            "content": {
+                "text/csv": {
+                    "schema": {"type": "string", "format": "binary"}
+                }
+            },
+        }
+    },
+)
 def sample_schedule_csv():
     sample_file = Path(__file__).resolve().parent.parent / "static" / "sample_schedule.csv"
     if not sample_file.exists():
