@@ -231,3 +231,30 @@ def test_labeled_csv_rejects_non_binary_outcomes(tmp_path):
         assert "must be 0 or 1" in str(exc)
     else:
         raise AssertionError("Non-binary observed outcome labels should be rejected")
+
+
+
+def test_real_labeled_candidate_cannot_overwrite_active_serving_artifact(tmp_path):
+    import argparse
+    from pathlib import Path
+    from scripts.train_risk_model import train
+
+    source = tmp_path / "approved_labeled_snapshots.csv"
+    _write_labeled_snapshot_csv(source, days=365, projects=6)
+    serving_artifact = Path(__file__).resolve().parents[1] / "app" / "risk_model.json"
+    original_bytes = serving_artifact.read_bytes()
+    try:
+        train(argparse.Namespace(
+            input_csv=str(source),
+            rows=60000,
+            seed=20261010,
+            output=str(serving_artifact),
+            model_version="must-not-promote-automatically",
+            embargo_days=30,
+            max_epochs=35,
+        ))
+    except ValueError as exc:
+        assert "Refusing to overwrite the active proof-model artifact" in str(exc)
+    else:
+        raise AssertionError("Real-data candidate must never overwrite active artifact automatically")
+    assert serving_artifact.read_bytes() == original_bytes
