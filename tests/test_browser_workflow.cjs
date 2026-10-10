@@ -139,7 +139,7 @@ async function main() {
     assert.equal(await page.evaluate(() => window.__xss || false), false, "CSV task names must not execute script");
 
     // An invalid dependency must show a readable error and invalidate the previous result.
-    const invalidCsv = "task_id,task_name,duration_days,predecessors\\nA,Approval,2,MISSING\\n";
+    const invalidCsv = "task_id,task_name,duration_days,predecessors\nA,Approval,2,MISSING\n";
     await page.locator("#csvFile").setInputFiles({
       name: "invalid-missing-predecessor.csv",
       mimeType: "text/csv",
